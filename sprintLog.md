@@ -1,36 +1,68 @@
 # Sprint Planning
 
 Here I go over my plans for weekly sprints and log my progress throughout the weeks.
-Expected number of sprint weeks: 17
+
+`Expected number of sprint weeks: 17` (1 planning week + ~4 months of development)
 
 ## Sprint 1 (September 14 - September 20)
 
-### Backlog
+### 1-Backlog
 
-1. Create a Software Requirement Specification
-2. Set up Trello with key user stories in upcoming sprints
-3. Develop the core architecture of the application
+Planning:
+
+1. Set up Trello with key user stories in upcoming sprints
+2. Come up with the high level architecture of the application
+3. Come up with requirements for the First Agile Iteration (To be completed by Sprint 3)
 4. Decide on the tools for this application
-5. Learn the fundamentals of new technologies I'm using (Nest.js)
 
-### Time Commitment Goals
+Learning:
 
-Projected time for this week:
+- Nest.js
+- Learn Auth0 and how to configure it with PostgreSQL
+- Spin up Postgres in a Docker Container
 
-    Monday-Friday: ~45 minutes
+### 1-Time Commitment Goals
 
-    Saturday and Sundary: ~90 minutes
+Projected time for this week: 7 hours
+
+    Tuesday-Friday: ~45 minutes
+
+    Saturday and Sunday: ~120 minutes
 
 Time Allocation Plan (% of the week's time budget):
 
     Planning, Architecture, Setup: 60%
 
-    Learning Nest.js: 40%
+    Learning: 40%
 
-#### Time Considerations
+#### 1-Time Considerations
 
-7 hours a week is around the amount of time I can spend on the project, as I have university and I have several daily activites I engage in.
+I aim to spend 10 hours a week on most weeks, but I'll ease in and be conservative for the first week.
 
-A group project I was part of (GoalTrack) is aiming to become a startup, and I'll be spending time on that project, which may cut my time for this project. Hopefully I can still reach the project time goal.
+I also have university classes and am working in a team project, so it would be hard to dedicate more than 10 hours weekly on this project.
 
-### Week Results
+### Week 1 Results
+
+I've decided on some of the core features and architecture in the past week, but I hadn't succeeded in coming up with a detailed enough plan. I did meet my 7 hour goal, but some docker configuration aspects took me longer than I'd like.
+
+This upcoming week I'll have to start with the coding, but I can take some time each day to expand on my plans. The starting code won't be too rigid so it's fine for me to finalize my plans throughout this next week.
+
+## Sprint 2 (September 21 - September 27)
+
+### 2-Backlog
+
+- finalize planning
+- Set up the Nest.js server
+- Set up the React & Postgres frontend
+- Set up Auth0 authentication with Postgres
+
+### 2-Time Commitment Goals
+
+Projected time for this week: 10 hours
+
+    Monday, Wednesday: ~45 minutes
+    Tuesday: ~90 minutes
+    Thursday-Friday: ~60 minutes
+    Saturday and Sunday: ~150 minutes
+
+### Week 2 Results
