@@ -8,6 +8,8 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
+    "typeorm": "ts-node ./node_modules/typeorm/cli.js",
+    "typeorm:migrate": "npm run typeorm migration:generate -- -n",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -25,6 +27,7 @@
     "@nestjs/core": "^7.0.0",
     "@nestjs/platform-express": "^7.0.0",
     "@nestjs/typeorm": "^7.1.4",
+    "dotenv": "^8.2.0",
     "pg": "^8.3.3",
     "pg-connection-string": "^2.3.0",
     "reflect-metadata": "^0.1.13",

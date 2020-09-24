@@ -1,5 +1,3 @@
-//NOTE: fix this for the current case
-
 import { ConnectionOptions } from "typeorm";
 import * as PostgressConnectionStringParser from "pg-connection-string";
 
