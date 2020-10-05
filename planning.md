@@ -1,4 +1,5 @@
-#Toma Planning
+# Toma Planning
+
 Toma will be a tournament manager web application
 
 Project specific features:
