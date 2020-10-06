@@ -73,3 +73,25 @@ In this week, I modelled some of the database tables and begun setting up typeor
 ### 3-Time Commitment Goals
 
 `Projected time for this week: 7 hours`
+
+### Week 3 Results
+
+`Time Spent: 5.5 Hours`
+
+This week laid the groundwork for the database logic the rest of the project will be built upon. I set up some dto validation, but ultimately, I didn't end up finishing a single feature. I must admit that the Nest.js pattern is still one I haven't fully settled into, so I haven't been the most efficient.
+
+I envision that I'll be able to spend more than double this amount of time in the upcoming week, as I have fewer commitments and have made some cuts to a few activities I dedicated time towards.
+
+Honestly, I'm doubtful that I'll finish the first agile iteration by the end of next week, but I'll aim for a light iteration; spending 4 weeks without anything deployed would be unfortunate.
+
+## Sprint 4 (October 5 to October 11)
+
+### 4-backlog
+
+- Finish up the authentication services
+- Hook a React frontend to the application
+- Add simplistic features for creating and joining tournaments
+
+### 4-Time Commitment Goals
+
+`Projected Time for this week: 12 hours`
