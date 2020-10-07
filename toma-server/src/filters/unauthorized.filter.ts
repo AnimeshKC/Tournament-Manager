@@ -8,7 +8,7 @@ import {
 import { LocalStrategy } from "src/auth/local.strategy";
 import { Response } from "express";
 @Catch(UnauthorizedException, ForbiddenException)
-export class Unathorized implements ExceptionFilter {
+export class Unauthorized implements ExceptionFilter {
   constructor(private readonly strategy: LocalStrategy) {}
   catch(
     _exception: ForbiddenException | UnauthorizedException,

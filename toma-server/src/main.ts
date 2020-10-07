@@ -7,8 +7,6 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV === "development")
 
 import { AppModule } from "./app.module";
 
-cookieParser;
-cookieSession;
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
