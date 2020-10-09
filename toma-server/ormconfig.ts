@@ -1,5 +1,6 @@
 import { ConnectionOptions } from "typeorm";
 import * as PostgressConnectionStringParser from "pg-connection-string";
+import { join } from "path";
 
 if (!process.env.NODE_ENV || process.env.NODE_ENV === "development")
   require("dotenv").config();
@@ -34,7 +35,8 @@ const config: ConnectionOptions = {
   // __dirname is either dist or src folder, meaning either
   // the compiled js in prod or the ts in dev.
   // migrations: [__dirname + "/migrations/**/*{.ts,.js}"]
-  migrations: ["src/migrations/**/*{.ts,.js}"],
+  // migrations: ["src/migrations/**/*{.ts,.js}"],
+  migrations: [join(__dirname + "src/migrations/**/*{.ts,.js}")],
   cli: {
     // Location of migration should be inside src folder
     // to be compiled into dist/ folder.
