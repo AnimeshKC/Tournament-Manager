@@ -4,14 +4,18 @@ import {
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
-import { UsersService } from "src/users/users.service";
-import bcrypt from "bcrypt";
-import RegisterDto from "./dto/register.dto";
-import PostgresErrorCode from "src/database/postgresErrorCodes.enum";
+import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
+
+import { UsersService } from "src/users/users.service";
+import RegisterDto from "./dto/register.dto";
+import PostgresErrorCode from "src/database/postgresErrorCodes.enum";
 import TokenPayload from "./tokenPayload.interface";
+import { User } from "src/entity/user.entity";
+
 const saltRounds = 10;
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -20,6 +24,7 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
   public async register(registrationData: RegisterDto) {
+    // console.log(registrationData)
     try {
       const hashedPassword = await bcrypt.hash(
         registrationData.password,
@@ -30,21 +35,22 @@ export class AuthService {
         password: hashedPassword,
       });
       if (!createdUser) throw new UnauthorizedException("Unknown user");
-      createdUser.password = undefined;
-      return createdUser;
+      return this.getUserOutput(createdUser);
     } catch (error) {
       if (error?.code === PostgresErrorCode.UniqueViolation) {
-        const message = error?.detail || "Username or Email already exists"; //this fail-safe is likely unneeded
         throw new HttpException(error.detail, HttpStatus.BAD_REQUEST);
       }
       throw error;
     }
   }
+  private getUserOutput(userData: User) {
+    const { password, ...userOutput } = userData;
+    return userOutput
+  }
   public async getAuthenticatedUser(username: string, password: string) {
     const user = await this.usersService.findByUsername(username);
     await this.verifyPassword(password, user.password);
-    user.password = undefined;
-    return user;
+    return this.getUserOutput(user)
   }
   public getCookieWithJwtToken(userId: number) {
     const payload: TokenPayload = { userId };

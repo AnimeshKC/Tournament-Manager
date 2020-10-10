@@ -9,17 +9,22 @@ import TokenPayload from "./tokenPayload.interface";
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-    private readonly configService: ConfigService,
+    configService: ConfigService,
     private readonly userService: UsersService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (request: Request) => request?.cookies?.Authentication,
+        (request: Request) => {
+          // console.log(request?.cookies?.Authentication)
+          // console.log(configService.get("JWT_SECRET"))
+          return request?.cookies?.Authentication
+        },
       ]),
       secretOrKey: configService.get("JWT_SECRET"),
     });
   }
   async validate(payload: TokenPayload) {
+    // console.log(payload)
     return this.userService.findById(payload.userId);
   }
 }
