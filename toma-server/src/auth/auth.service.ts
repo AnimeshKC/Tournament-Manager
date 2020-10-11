@@ -8,11 +8,11 @@ import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 
-import { UsersService } from "src/users/users.service";
 import RegisterDto from "./dto/register.dto";
 import PostgresErrorCode from "src/database/postgresErrorCodes.enum";
 import TokenPayload from "./tokenPayload.interface";
-import { User } from "src/entity/user.entity";
+import { User } from "src/users/user.entity";
+import { UsersService } from "src/users/users.service";
 
 const saltRounds = 10;
 
@@ -45,12 +45,12 @@ export class AuthService {
   }
   private getUserOutput(userData: User) {
     const { password, ...userOutput } = userData;
-    return userOutput
+    return userOutput;
   }
   public async getAuthenticatedUser(username: string, password: string) {
     const user = await this.usersService.findByUsername(username);
     await this.verifyPassword(password, user.password);
-    return this.getUserOutput(user)
+    return this.getUserOutput(user);
   }
   public getCookieWithJwtToken(userId: number) {
     const payload: TokenPayload = { userId };
