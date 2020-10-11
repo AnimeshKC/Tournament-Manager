@@ -20,7 +20,7 @@ const config: ConnectionOptions = {
   username: user,
   password: password,
   database,
-  entities: [__dirname + "/**/*.entity{.ts,.js}"],
+  entities: [__dirname + "/**/**/*.entity{.ts,.js}"],
 
   // We are using migrations, synchronize should be set to false.
   synchronize: false,

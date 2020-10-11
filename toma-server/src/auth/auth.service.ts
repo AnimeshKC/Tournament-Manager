@@ -11,7 +11,7 @@ import { ConfigService } from "@nestjs/config";
 import RegisterDto from "./dto/register.dto";
 import PostgresErrorCode from "src/database/postgresErrorCodes.enum";
 import TokenPayload from "./tokenPayload.interface";
-import { User } from "src/users/user.entity";
+import { User } from "src/users/entities/user.entity";
 import { UsersService } from "src/users/users.service";
 
 const saltRounds = 10;
