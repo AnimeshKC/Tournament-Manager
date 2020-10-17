@@ -20,7 +20,7 @@ const config: ConnectionOptions = {
   username: user,
   password: password,
   database,
-  entities: [__dirname + "/**/**/*.entity{.ts,.js}"],
+  entities: [__dirname + "/**/*.entity{.ts,.js}"],
 
   // We are using migrations, synchronize should be set to false.
   synchronize: false,
@@ -36,7 +36,7 @@ const config: ConnectionOptions = {
   // the compiled js in prod or the ts in dev.
   // migrations: [__dirname + "/migrations/**/*{.ts,.js}"]
   // migrations: ["src/migrations/**/*{.ts,.js}"],
-  migrations: [join(__dirname + "src/migrations/**/*{.ts,.js}")],
+  migrations: [join(__dirname, "src/migrations/**/*{.ts,.js}")],
   cli: {
     // Location of migration should be inside src folder
     // to be compiled into dist/ folder.
