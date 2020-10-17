@@ -32,4 +32,6 @@ export class Tournament {
   tournamentAccess: TournamentAccess;
   @Column({ type: "boolean", default: true })
   joinable: boolean;
+  @Column({ type: "integer", default: 0 })
+  currentRound: number;
 }
