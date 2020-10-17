@@ -10,8 +10,8 @@ export class Tournament {
   id: number;
   @Column({ type: "text", nullable: false })
   name: string;
-  @ManyToOne(_ => User)
-  userId: User;
+  @ManyToOne(_ => User, { nullable: false })
+  user: User;
   @Column({
     type: "enum",
     enum: TournamentVariants,
