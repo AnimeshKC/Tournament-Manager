@@ -9,7 +9,6 @@ import {
 } from "@nestjs/common";
 import { Response } from "express";
 
-
 import { AuthService } from "./auth.service";
 import RegisterDto from "./dto/register.dto";
 import { LocalAuthGuard } from "./localAuth.guard";
@@ -35,13 +34,13 @@ export class AuthController {
     const user = request.user;
     const cookie = this.authService.getCookieWithJwtToken(user.id);
     response.setHeader("Set-Cookie", cookie);
-    const {password, ...resUser} = user 
+    const { password, ...resUser } = user;
     return response.send(resUser);
   }
   @UseGuards(JwtAuthGuard)
   @Post("log-out")
   async logout(@Res() response: Response): Promise<Response<any>> {
-+    response.setHeader("Set-Cookie", this.authService.getLogoutCookie());
+    response.setHeader("Set-Cookie", this.authService.getLogoutCookie());
     return response.sendStatus(200);
   }
 }
