@@ -2,7 +2,7 @@ import { User } from "../../users/entities/user.entity";
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
 import { TournamentAccess } from "../types/tournamentAccess.enum";
 import { TournamentStatus } from "../types/tournamentStatus.enum";
-import { TournamentVariants } from "../types/tournamentTypes.enum";
+import { TournamentVariants } from "../types/tournamentVariants.enum";
 
 @Entity()
 export class Tournament {
