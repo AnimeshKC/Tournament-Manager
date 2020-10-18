@@ -5,16 +5,18 @@ import {
   Column,
   ManyToOne,
   Check,
+  Unique,
 } from "typeorm";
 import { Tournament } from "./tournament.entity";
 
 @Entity()
 @Check(`"participantName" IS NOT NULL OR "userId" IS NOT NULL`)
+@Unique("Unique Participant name per tournament", ["tourn", "participantName"])
 export class SingleElimMember {
   @PrimaryGeneratedColumn()
   id: number;
   @ManyToOne(_ => Tournament, { nullable: false })
-  tournId: Tournament;
+  tourn: Tournament;
 
   @Column({ type: "text" })
   participantName: string;
