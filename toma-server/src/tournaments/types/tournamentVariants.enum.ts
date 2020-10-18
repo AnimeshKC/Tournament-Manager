@@ -1,3 +1,3 @@
 export enum TournamentVariants {
-  SINGLE_ELIM,
+  SINGLE_ELIM = "Single Elimination",
 }
