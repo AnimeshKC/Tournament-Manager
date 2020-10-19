@@ -74,4 +74,15 @@ I envision that I'll be able to spend more than double this amount of time in th
 
 ### Week 4 Results
 
-Set up the core authentication aspects and started the tournament entity. The following week should wrap up the backend features for hte first Agile Iteration.
+I set up the core authentication aspects and started the tournament entity. The following week should begin the backend features for the First Agile Iteration.
+
+## Sprint 5 (October 12 to October 18)
+
+### 5-backlog
+
+- Add backend services for basic tournaments
+- Hook a frontend to the application
+
+### Week 5 Results
+
+Added some tournament relationships and mapped out the logic for the First Agile Iteration backend services. This upcoming week should finish the backend for the First Agile Iteration.
