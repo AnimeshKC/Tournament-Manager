@@ -6,6 +6,7 @@ import {
   ManyToOne,
   Check,
   Unique,
+  JoinColumn,
 } from "typeorm";
 import { Tournament } from "./tournament.entity";
 
@@ -15,13 +16,23 @@ import { Tournament } from "./tournament.entity";
 export class SingleElimMember {
   @PrimaryGeneratedColumn()
   id: number;
+  @Column()
+  tournId: number;
   @ManyToOne(_ => Tournament, { nullable: false })
+  @JoinColumn({ name: "tournId" })
   tourn: Tournament;
 
   @Column({ type: "text" })
   participantName: string;
-  @ManyToOne(_ => User)
+  @Column()
+  userId: number;
+  @ManyToOne(
+    () => User,
+    user => user.singleElimEntries,
+  )
+  @JoinColumn({ name: "userId" })
   user: User;
+
   @Column({ type: "integer", default: 0 })
   roundEliminated: number;
   @Column({ type: "integer", default: 0 })

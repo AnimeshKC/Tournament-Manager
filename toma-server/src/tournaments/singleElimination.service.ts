@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { tournamentForeignKeyTweaks1602948354431 } from "src/migrations/1602948354431-tournamentForeignKeyTweaks";
 import { Repository } from "typeorm";
 import { SingleElimMember } from "./entities/singleElimMember.entity";
 
@@ -7,6 +8,14 @@ import { SingleElimMember } from "./entities/singleElimMember.entity";
 export class SingleEliminationService {
   constructor(
     @InjectRepository(SingleElimMember)
-    singleElimRepository: Repository<SingleElimMember>,
+    private singleElimRepository: Repository<SingleElimMember>,
   ) {}
+  async addParticipantName(tournId: number, participantName: string) {
+    const entry = this.singleElimRepository.create({
+      participantName,
+      tournId,
+    });
+    await this.singleElimRepository.save(entry);
+    return entry;
+  }
 }

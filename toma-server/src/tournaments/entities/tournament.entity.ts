@@ -1,8 +1,16 @@
 import { User } from "../../users/entities/user.entity";
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+} from "typeorm";
 import { TournamentAccess } from "../types/tournamentAccess.enum";
 import { TournamentStatus } from "../types/tournamentStatus.enum";
 import { TournamentVariants } from "../types/tournamentVariants.enum";
+import { SingleElimMember } from "./singleElimMember.entity";
 
 @Entity()
 export class Tournament {
@@ -10,8 +18,21 @@ export class Tournament {
   id: number;
   @Column({ type: "text", nullable: false })
   name: string;
-  @ManyToOne(_ => User, { nullable: false })
+
+  @Column()
+  userId: number;
+  @ManyToOne(
+    () => User,
+    user => user.tournaments,
+    { nullable: false },
+  )
+  @JoinColumn({ name: "userId" })
   user: User;
+  @OneToMany(
+    () => SingleElimMember,
+    singleElim => singleElim.tourn,
+  )
+  singleElimMembers: SingleElimMember[];
   @Column({
     type: "enum",
     enum: TournamentVariants,

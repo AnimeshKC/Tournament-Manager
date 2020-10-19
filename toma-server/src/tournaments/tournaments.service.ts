@@ -3,16 +3,15 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import AddPartipantDto from "./dto/addParticipant.dto";
 import CreateTournamentDto from "./dto/createTournament.dto";
-import { SingleElimMember } from "./entities/singleElimMember.entity";
 import { Tournament } from "./entities/tournament.entity";
+import { SingleEliminationService } from "./singleElimination.service";
 
 @Injectable()
 export class TournamentService {
   constructor(
     @InjectRepository(Tournament)
     private tournamentRepository: Repository<Tournament>,
-    @InjectRepository(SingleElimMember)
-    private singleElimRepository: Repository<SingleElimMember>,
+    private singleElimService: SingleEliminationService,
   ) {}
   async createTournament(
     creationData: CreateTournamentDto,

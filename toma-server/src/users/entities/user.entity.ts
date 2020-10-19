@@ -1,4 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { SingleElimMember } from "src/tournaments/entities/singleElimMember.entity";
+import { Tournament } from "src/tournaments/entities/tournament.entity";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
 
 @Entity()
 export class User {
@@ -10,4 +12,16 @@ export class User {
   email: string;
   @Column({ type: "varchar", nullable: false, length: 255 })
   password: string;
+
+  @OneToMany(
+    () => SingleElimMember,
+    entry => entry.user,
+  )
+  singleElimEntries: SingleElimMember[];
+
+  @OneToMany(
+    () => Tournament,
+    tournament => tournament.user,
+  )
+  tournaments: Tournament[];
 }
