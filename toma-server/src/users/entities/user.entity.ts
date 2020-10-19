@@ -1,5 +1,5 @@
-import { SingleElimMember } from "src/tournaments/entities/singleElimMember.entity";
-import { Tournament } from "src/tournaments/entities/tournament.entity";
+import { SingleElimMember } from "../../tournaments/entities/singleElimMember.entity";
+import { Tournament } from "../../tournaments/entities/tournament.entity";
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
 
 @Entity()
