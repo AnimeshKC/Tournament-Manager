@@ -16,6 +16,10 @@ export class SingleEliminationService {
       tournId,
     });
     await this.singleElimRepository.save(entry);
-    return entry;
+    return {
+      participantName: entry.participantName,
+      tournId: entry.tournId,
+      tournType: "Single Elimination",
+    };
   }
 }

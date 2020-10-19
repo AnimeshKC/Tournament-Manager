@@ -22,6 +22,10 @@ export class TournamentService {
   }
   async addParticipantToTournament(participantData: AddPartipantDto) {
     if (participantData.type === "Single Elimination") {
+      return this.singleElimService.addParticipantName(
+        participantData.tournId,
+        participantData.participantName,
+      );
     }
   }
 }
