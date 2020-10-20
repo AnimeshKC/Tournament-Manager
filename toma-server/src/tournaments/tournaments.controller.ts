@@ -1,6 +1,7 @@
 import { Body, Controller, Post, Req, UseGuards } from "@nestjs/common";
 import JwtAuthGuard from "src/auth/guards/jwt-auth.guard";
 import RequestWithUser from "src/auth/requestWithUser.interface";
+import AddPartipantDto from "./dto/addParticipant.dto";
 import { TournamentService } from "./tournaments.service";
 import { TournamentVariants } from "./types/tournamentVariants.enum";
 
@@ -15,5 +16,9 @@ export class TournController {
   ) {
     const userId = request.user.id;
     return this.tournamentService.createTournament({ ...creationData, userId });
+  }
+  @Post("addParticipant")
+  async addParticipant(@Body() participantData: AddPartipantDto) {
+    return this.tournamentService.addParticipantToTournament(participantData);
   }
 }
