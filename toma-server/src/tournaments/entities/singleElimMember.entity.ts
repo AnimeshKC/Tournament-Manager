@@ -18,17 +18,22 @@ export class SingleElimMember {
   id: number;
   @Column()
   tournId: number;
-  @ManyToOne(_ => Tournament, { nullable: false })
+  @ManyToOne(
+    _ => Tournament,
+    tournament => tournament.singleElimMembers,
+    { nullable: false },
+  )
   @JoinColumn({ name: "tournId" })
   tourn: Tournament;
 
   @Column({ type: "text" })
   participantName: string;
-  @Column()
+  @Column({ type: "integer", nullable: true })
   userId: number;
   @ManyToOne(
     () => User,
     user => user.singleElimEntries,
+    { nullable: true },
   )
   @JoinColumn({ name: "userId" })
   user: User;
