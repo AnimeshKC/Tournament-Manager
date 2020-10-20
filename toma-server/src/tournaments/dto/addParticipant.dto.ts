@@ -1,7 +1,7 @@
 import { TournamentVariants } from "../types/tournamentVariants.enum";
 
 export default class AddPartipantDto {
-  type: TournamentVariants;
+  tournamentType: TournamentVariants;
   participantName: string;
   tournId: number;
 }
