@@ -1,6 +1,6 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { tournamentForeignKeyTweaks1602948354431 } from "src/migrations/1602948354431-tournamentForeignKeyTweaks";
+import PostgresErrorCode from "src/database/postgresErrorCodes.enum";
 import { Repository } from "typeorm";
 import { SingleElimMember } from "./entities/singleElimMember.entity";
 
@@ -11,15 +11,22 @@ export class SingleEliminationService {
     private singleElimRepository: Repository<SingleElimMember>,
   ) {}
   async addParticipantName(tournId: number, participantName: string) {
-    const entry = this.singleElimRepository.create({
-      participantName,
-      tournId,
-    });
-    await this.singleElimRepository.save(entry);
-    return {
-      participantName: entry.participantName,
-      tournId: entry.tournId,
-      tournType: "Single Elimination",
-    };
+    try {
+      const entry = this.singleElimRepository.create({
+        participantName,
+        tournId,
+      });
+      await this.singleElimRepository.save(entry);
+      return {
+        participantName: entry.participantName,
+        tournId: entry.tournId,
+        type: "Single Elimination",
+      };
+    } catch (error) {
+      if (error?.code === PostgresErrorCode.UniqueViolation) {
+        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      }
+      throw error;
+    }
   }
 }
