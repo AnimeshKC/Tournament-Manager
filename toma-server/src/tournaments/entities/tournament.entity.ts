@@ -11,6 +11,7 @@ import { TournamentAccess } from "../types/tournamentAccess.enum";
 import { TournamentStatus } from "../types/tournamentStatus.enum";
 import { TournamentVariants } from "../types/tournamentVariants.enum";
 import { SingleElimMember } from "./singleElimMember.entity";
+import { PendingMember } from "./pendingMember.entity";
 
 @Entity()
 export class Tournament {
@@ -33,6 +34,11 @@ export class Tournament {
     singleElim => singleElim.tourn,
   )
   singleElimMembers: SingleElimMember[];
+  @OneToMany(
+    () => PendingMember,
+    pending => pending.tourn,
+  )
+  pendingMembers: PendingMember[];
   @Column({
     type: "enum",
     enum: TournamentVariants,

@@ -1,6 +1,7 @@
 import { SingleElimMember } from "../../tournaments/entities/singleElimMember.entity";
 import { Tournament } from "../../tournaments/entities/tournament.entity";
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { PendingMember } from "../../tournaments/entities/pendingMember.entity";
 
 @Entity()
 export class User {
@@ -24,4 +25,9 @@ export class User {
     tournament => tournament.user,
   )
   tournaments: Tournament[];
+  @OneToMany(
+    () => PendingMember,
+    pending => pending.user,
+  )
+  pendingEntries: PendingMember[];
 }
