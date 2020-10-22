@@ -25,13 +25,14 @@ export class Tournament {
   @ManyToOne(
     () => User,
     user => user.tournaments,
-    { nullable: false },
+    { nullable: false, onDelete: "CASCADE" },
   )
   @JoinColumn({ name: "userId" })
   user: User;
   @OneToMany(
     () => SingleElimMember,
     singleElim => singleElim.tourn,
+    { onDelete: "CASCADE" },
   )
   singleElimMembers: SingleElimMember[];
   @OneToMany(

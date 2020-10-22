@@ -21,7 +21,7 @@ export class SingleElimMember {
   @ManyToOne(
     _ => Tournament,
     tournament => tournament.singleElimMembers,
-    { nullable: false },
+    { nullable: false, onDelete: "CASCADE" },
   )
   @JoinColumn({ name: "tournId" })
   tourn: Tournament;
@@ -33,7 +33,7 @@ export class SingleElimMember {
   @ManyToOne(
     () => User,
     user => user.singleElimEntries,
-    { nullable: true },
+    { nullable: true, onDelete: "CASCADE" },
   )
   @JoinColumn({ name: "userId" })
   user: User;

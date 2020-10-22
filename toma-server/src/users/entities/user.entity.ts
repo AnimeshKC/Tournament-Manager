@@ -17,12 +17,14 @@ export class User {
   @OneToMany(
     () => SingleElimMember,
     entry => entry.user,
+    { onDelete: "CASCADE" },
   )
   singleElimEntries: SingleElimMember[];
 
   @OneToMany(
     () => Tournament,
     tournament => tournament.user,
+    { onDelete: "CASCADE" },
   )
   tournaments: Tournament[];
   @OneToMany(
