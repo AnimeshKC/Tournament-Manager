@@ -8,7 +8,7 @@ import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 
-import RegisterDto from "./dto/register.dto";
+import RegisterDTO from "./dto/register.dto";
 import PostgresErrorCode from "src/database/postgresErrorCodes.enum";
 import TokenPayload from "./tokenPayload.interface";
 import { User } from "src/users/entities/user.entity";
@@ -23,7 +23,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
-  public async register(registrationData: RegisterDto) {
+  public async register(registrationData: RegisterDTO) {
     // console.log(registrationData)
     try {
       const hashedPassword = await bcrypt.hash(

@@ -10,7 +10,7 @@ import {
 import { Response } from "express";
 
 import { AuthService } from "./auth.service";
-import RegisterDto from "./dto/register.dto";
+import RegisterDTO from "./dto/register.dto";
 import { LocalAuthGuard } from "./localAuth.guard";
 import RequestWithUser from "./requestWithUser.interface";
 import JwtAuthGuard from "./guards/jwt-auth.guard";
@@ -19,7 +19,7 @@ import JwtAuthGuard from "./guards/jwt-auth.guard";
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
   @Post("register")
-  async register(@Body() registrationData: RegisterDto): Promise<any> {
+  async register(@Body() registrationData: RegisterDTO): Promise<any> {
     // console.log(registrationData)
     return this.authService.register(registrationData);
   }

@@ -1,7 +1,7 @@
 import { IsEmail, Matches, MaxLength, MinLength } from "class-validator";
 import { Match } from "src/decorators/match.decorator";
 
-export default class RegisterDto {
+export default class RegisterDTO {
   @IsEmail({}, { message: "email: not a valid address" })
   @MaxLength(255, { message: "email: must not exceed 255 characters" })
   email: string;
@@ -16,7 +16,9 @@ export default class RegisterDto {
   @Matches(/(?=.*[A-Z])/, {
     message: "password: must contain an uppercase letter",
   })
-  @Matches(/(?=.*[a-z])/, { message: "password: must contain a lowercase letter" })
+  @Matches(/(?=.*[a-z])/, {
+    message: "password: must contain a lowercase letter",
+  })
   password: string;
   @Match("password", { message: "confirmPassword: must match password" })
   confirmPassword: string;
