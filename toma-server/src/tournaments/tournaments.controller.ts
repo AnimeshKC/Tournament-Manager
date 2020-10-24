@@ -21,4 +21,15 @@ export class TournController {
   async addParticipant(@Body() participantData: AddPartipantDTO) {
     return this.tournamentService.addParticipantToTournament(participantData);
   }
+  @Post("addPending")
+  async addPending(
+    @Body() pendingBody: { tournId: number },
+    @Req() request: RequestWithUser,
+  ) {
+    const userId = request.user.id;
+    this.tournamentService.addUserToPending({
+      userId,
+      tournId: pendingBody.tournId,
+    });
+  }
 }

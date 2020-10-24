@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import AddPartipantDTO from "./dto/addParticipant.dto";
 import CreateTournamentDTO from "./dto/createTournament.dto";
+import { PendingMember } from "./entities/pendingMember.entity";
 import { Tournament } from "./entities/tournament.entity";
 import { SingleEliminationService } from "./singleElimination.service";
 
@@ -11,6 +12,8 @@ export class TournamentService {
   constructor(
     @InjectRepository(Tournament)
     private tournamentRepository: Repository<Tournament>,
+    @InjectRepository(PendingMember)
+    private pendingRepository: Repository<PendingMember>,
     private singleElimService: SingleEliminationService,
   ) {}
   async createTournament(
@@ -27,5 +30,10 @@ export class TournamentService {
         participantData.participantName,
       );
     }
+  }
+  async addUserToPending(pendingData: { userId: number; tournId: number }) {
+    const pendingUser = this.pendingRepository.create(pendingData);
+    await this.pendingRepository.save(pendingUser);
+    return pendingUser;
   }
 }
