@@ -1,11 +1,19 @@
-import { Body, Controller, Post, Req, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Post,
+  Req,
+  UseGuards,
+  UseInterceptors,
+} from "@nestjs/common";
 import JwtAuthGuard from "src/auth/guards/jwt-auth.guard";
 import RequestWithUser from "src/auth/requestWithUser.interface";
 import AddPartipantDTO from "./dto/addParticipant.dto";
 import { TournamentService } from "./tournaments.service";
 import { TournamentVariants } from "./types/tournamentVariants.enum";
-
+import { PostgresErrorInterceptor } from "./../errorHandling/interceptors/postgresError.interceptor";
 @Controller("tourn")
+@UseInterceptors(PostgresErrorInterceptor)
 export class TournController {
   constructor(private readonly tournamentService: TournamentService) {}
   @UseGuards(JwtAuthGuard)

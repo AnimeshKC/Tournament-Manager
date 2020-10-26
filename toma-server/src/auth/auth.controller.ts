@@ -6,6 +6,7 @@ import {
   Req,
   Res,
   UseGuards,
+  UseInterceptors,
 } from "@nestjs/common";
 import { Response } from "express";
 
@@ -14,8 +15,10 @@ import RegisterDTO from "./dto/register.dto";
 import { LocalAuthGuard } from "./localAuth.guard";
 import RequestWithUser from "./requestWithUser.interface";
 import JwtAuthGuard from "./guards/jwt-auth.guard";
+import { PostgresErrorInterceptor } from "../errorHandling/interceptors/postgresError.interceptor";
 
 @Controller("auth")
+@UseInterceptors(PostgresErrorInterceptor)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
   @Post("register")
