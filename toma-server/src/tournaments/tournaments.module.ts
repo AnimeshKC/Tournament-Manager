@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AuthModule } from "src/auth/auth.module";
 import { UsersModule } from "src/users/users.module";
+import { PendingMember } from "./entities/pendingMember.entity";
 import { SingleElimMember } from "./entities/singleElimMember.entity";
 import { Tournament } from "./entities/tournament.entity";
 import { SingleEliminationService } from "./singleElimination.service";
@@ -13,7 +14,7 @@ import { TournamentService } from "./tournaments.service";
   imports: [
     UsersModule,
     AuthModule,
-    TypeOrmModule.forFeature([Tournament, SingleElimMember]),
+    TypeOrmModule.forFeature([Tournament, SingleElimMember, PendingMember]),
   ],
   providers: [TournamentService, SingleEliminationService],
 })
