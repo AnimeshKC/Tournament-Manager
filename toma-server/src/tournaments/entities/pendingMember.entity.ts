@@ -4,10 +4,12 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Unique,
 } from "typeorm";
 import { User } from "../../users/entities/user.entity";
 import { Tournament } from "./tournament.entity";
 
+@Unique("No duplicate member per tourn-user pair", ["tourn", "user"])
 @Entity()
 export class PendingMember {
   @PrimaryGeneratedColumn()
