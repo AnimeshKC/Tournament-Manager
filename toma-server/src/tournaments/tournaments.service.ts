@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import AddPartipantDTO from "./dto/addParticipant.dto";
@@ -23,6 +23,7 @@ export class TournamentService {
     await this.tournamentRepository.save(newTournament);
     return newTournament;
   }
+  //TODO: Make this generic so that it can process both participant names and userids
   async addParticipantToTournament(participantData: AddPartipantDTO) {
     if (participantData.tournamentType === "Single Elimination") {
       return this.singleElimService.addParticipantName(
@@ -35,5 +36,49 @@ export class TournamentService {
     const pendingUser = this.pendingRepository.create(pendingData);
     await this.pendingRepository.save(pendingUser);
     return pendingUser;
+  }
+  async acceptPendingUser(acceptData: {
+    managerId: number;
+    tournId: number;
+    pendingUserId: number;
+  }) {
+    const { tournId, managerId, pendingUserId } = acceptData;
+    try {
+      //check for ownership
+      const tournament = await this.tournamentRepository.findOne({
+        id: tournId,
+        userId: managerId,
+      });
+      if (!tournament)
+        throw new HttpException(
+          "This manager does not own the requested tournament",
+          HttpStatus.NOT_FOUND,
+        );
+      const pendingObject = {
+        tournId,
+        userId: pendingUserId,
+      };
+
+      const pendingInstance = await this.pendingRepository.findOne(
+        pendingObject,
+      );
+      if (!pendingInstance)
+        throw new HttpException(
+          "The requested user is not pending for the requested tournament",
+          HttpStatus.NOT_FOUND,
+        );
+      if (pendingInstance.tournId !== managerId)
+        throw new HttpException(
+          "The manager does not own the requested tournament",
+          HttpStatus.UNAUTHORIZED,
+        );
+      const deletePromise = this.pendingRepository.delete(pendingObject);
+      const tournamentType = pendingInstance.tourn.tournamentType;
+
+      //TODO: parallelize deletePromise and createPromise
+      //TODO: Use addUserToPending to place the user
+    } catch (err) {
+      throw err;
+    }
   }
 }

@@ -41,4 +41,18 @@ export class TournController {
       tournId: pendingBody.tournId,
     });
   }
+  @UseGuards(JwtAuthGuard)
+  @Post("acceptPending")
+  async acceptPending(
+    @Body() acceptBody: { tournId: number; pendingUserId: number },
+    @Req() request: RequestWithUser,
+  ) {
+    const managerId = request.user.id;
+    const { tournId, pendingUserId } = acceptBody;
+    return this.tournamentService.acceptPendingUser({
+      managerId,
+      tournId,
+      pendingUserId,
+    });
+  }
 }
