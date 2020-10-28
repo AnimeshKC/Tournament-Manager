@@ -1,11 +1,11 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import AddPartipantDTO from "./dto/addParticipant.dto";
 import CreateTournamentDTO from "./dto/createTournament.dto";
 import { PendingMember } from "./entities/pendingMember.entity";
 import { Tournament } from "./entities/tournament.entity";
 import { SingleEliminationService } from "./singleElimination.service";
+import { TournamentVariants } from "./types/tournamentVariants.enum";
 
 @Injectable()
 export class TournamentService {
@@ -24,12 +24,15 @@ export class TournamentService {
     return newTournament;
   }
   //TODO: Make this generic so that it can process both participant names and userids
-  async addParticipantToTournament(participantData: AddPartipantDTO) {
+  async addParticipantToTournament(participantData: {
+    tournamentType: TournamentVariants;
+    participantName?: string;
+    userId?: number;
+    tournId: number;
+  }) {
+    const { tournamentType, ...singleElimData } = participantData;
     if (participantData.tournamentType === "Single Elimination") {
-      return this.singleElimService.addParticipantName(
-        participantData.tournId,
-        participantData.participantName,
-      );
+      return this.singleElimService.addParticipant(singleElimData);
     }
   }
   async addUserToPending(pendingData: { userId: number; tournId: number }) {

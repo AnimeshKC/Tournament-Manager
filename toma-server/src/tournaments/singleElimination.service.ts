@@ -10,16 +10,21 @@ export class SingleEliminationService {
     @InjectRepository(SingleElimMember)
     private singleElimRepository: Repository<SingleElimMember>,
   ) {}
-  async addParticipantName(tournId: number, participantName: string) {
+  async addParticipant(participantData: {
+    tournId: number;
+    participantName?: string;
+    userId?: number;
+  }) {
     try {
-      const entry = this.singleElimRepository.create({
-        participantName,
-        tournId,
-      });
+      const entry = this.singleElimRepository.create(participantData);
       await this.singleElimRepository.save(entry);
+
+      const { tournId, participantName, userId } = entry;
+
       return {
-        participantName: entry.participantName,
-        tournId: entry.tournId,
+        tournId,
+        participantName,
+        userId,
         type: "Single Elimination",
       };
     } catch (error) {

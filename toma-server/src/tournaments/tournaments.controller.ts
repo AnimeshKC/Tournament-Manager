@@ -8,7 +8,6 @@ import {
 } from "@nestjs/common";
 import JwtAuthGuard from "src/auth/guards/jwt-auth.guard";
 import RequestWithUser from "src/auth/requestWithUser.interface";
-import AddPartipantDTO from "./dto/addParticipant.dto";
 import { TournamentService } from "./tournaments.service";
 import { TournamentVariants } from "./types/tournamentVariants.enum";
 import { PostgresErrorInterceptor } from "./../errorHandling/interceptors/postgresError.interceptor";
@@ -26,7 +25,14 @@ export class TournController {
     return this.tournamentService.createTournament({ ...creationData, userId });
   }
   @Post("addParticipant")
-  async addParticipant(@Body() participantData: AddPartipantDTO) {
+  async addParticipant(
+    @Body()
+    participantData: {
+      tournamentType: TournamentVariants;
+      participantName?: string;
+      tournId: number;
+    },
+  ) {
     return this.tournamentService.addParticipantToTournament(participantData);
   }
   @UseGuards(JwtAuthGuard)
@@ -48,11 +54,9 @@ export class TournController {
     @Req() request: RequestWithUser,
   ) {
     const managerId = request.user.id;
-    const { tournId, pendingUserId } = acceptBody;
     return this.tournamentService.acceptPendingUser({
       managerId,
-      tournId,
-      pendingUserId,
+      ...acceptBody,
     });
   }
 }
