@@ -29,7 +29,7 @@ export class TournController {
     @Body()
     participantData: {
       tournamentType: TournamentVariants;
-      participantName?: string;
+      participantName: string;
       tournId: number;
     },
   ) {
