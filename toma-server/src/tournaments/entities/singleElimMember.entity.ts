@@ -26,7 +26,7 @@ export class SingleElimMember {
   @JoinColumn({ name: "tournId" })
   tourn: Tournament;
 
-  @Column({ type: "text" })
+  @Column({ type: "text", nullable: true })
   participantName: string;
   @Column({ type: "integer", nullable: true })
   userId: number;
