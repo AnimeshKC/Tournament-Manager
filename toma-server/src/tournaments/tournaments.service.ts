@@ -40,48 +40,58 @@ export class TournamentService {
     await this.pendingRepository.save(pendingUser);
     return pendingUser;
   }
+  private async obtainPendingInstance(tournId: number, userId: number) {
+    const pendingInstance = await this.pendingRepository.findOne({
+      tournId,
+      userId,
+    });
+    if (!pendingInstance)
+      throw new HttpException(
+        "The requested user is not pending for the requested tournament",
+        HttpStatus.NOT_FOUND,
+      );
+    return pendingInstance;
+  }
+
+  private async obtainTournamentByUser(tournId: number, userId: number) {
+    const tournament = await this.tournamentRepository.findOne({
+      id: tournId,
+      userId,
+    });
+    if (!tournament)
+      throw new HttpException(
+        "User and Tournament combination do not match",
+        HttpStatus.NOT_FOUND,
+      );
+    return tournament;
+  }
+  //TODO: Extract pending repository logic to another service
   async acceptPendingUser(acceptData: {
     managerId: number;
     tournId: number;
     pendingUserId: number;
   }) {
-    const { tournId, managerId, pendingUserId } = acceptData;
-    try {
-      //check for ownership
-      const tournament = await this.tournamentRepository.findOne({
-        id: tournId,
-        userId: managerId,
-      });
-      if (!tournament)
-        throw new HttpException(
-          "This manager does not own the requested tournament",
-          HttpStatus.NOT_FOUND,
-        );
-      const pendingObject = {
-        tournId,
-        userId: pendingUserId,
-      };
+    const { tournId, managerId, pendingUserId: userId } = acceptData;
 
-      const pendingInstance = await this.pendingRepository.findOne(
-        pendingObject,
-      );
-      if (!pendingInstance)
-        throw new HttpException(
-          "The requested user is not pending for the requested tournament",
-          HttpStatus.NOT_FOUND,
-        );
-      if (pendingInstance.tournId !== managerId)
-        throw new HttpException(
-          "The manager does not own the requested tournament",
-          HttpStatus.UNAUTHORIZED,
-        );
-      const deletePromise = this.pendingRepository.delete(pendingObject);
-      const tournamentType = pendingInstance.tourn.tournamentType;
+    const pendingInstance = await this.obtainPendingInstance(tournId, userId);
+    const tournament = await this.obtainTournamentByUser(tournId, managerId);
 
-      //TODO: parallelize deletePromise and createPromise
-      //TODO: Use addUserToPending to place the user
-    } catch (err) {
-      throw err;
-    }
+    const tournamentType = tournament.tournamentType;
+
+    //TODO: convert this logic to a transaction
+    const addParticipantPromise = this.addParticipantToTournament({
+      tournamentType,
+      userId,
+      tournId,
+    });
+    const deleteFromPendingPromise = this.pendingRepository.delete(
+      pendingInstance.id,
+    );
+    await Promise.all([deleteFromPendingPromise, addParticipantPromise]);
+    return {
+      status: "User Added",
+      userId,
+      tournId,
+    };
   }
 }
