@@ -13,6 +13,7 @@ import { Tournament } from "./tournament.entity";
 @Entity()
 @Check(`"participantName" IS NOT NULL OR "userId" IS NOT NULL`)
 @Unique("Unique Participant name per tournament", ["tourn", "participantName"])
+@Unique("Only one user per tournament", ["tourn", "userId"])
 export class SingleElimMember {
   @PrimaryGeneratedColumn()
   id: number;
