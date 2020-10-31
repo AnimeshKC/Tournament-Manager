@@ -53,6 +53,19 @@ export class TournamentService {
     return pendingInstance;
   }
 
+  private async joinPendingAndTourn(tournId: number, userId: number) {
+    const pendingTournInstance = await this.pendingRepository.findOne(
+      { tournId, userId },
+      { relations: ["tourn"] },
+    );
+    if (!pendingTournInstance?.tourn) {
+      throw new HttpException(
+        "The requested pending user cannot be found",
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return pendingTournInstance;
+  }
   private async obtainTournamentByUser(tournId: number, userId: number) {
     const tournament = await this.tournamentRepository.findOne({
       id: tournId,
@@ -65,6 +78,13 @@ export class TournamentService {
       );
     return tournament;
   }
+  private checkId(userId: number, realId: number) {
+    if (userId !== realId)
+      throw new HttpException(
+        "User and Tournament combination do not match",
+        HttpStatus.NOT_FOUND,
+      );
+  }
   //TODO: Extract pending repository logic to another service
   async acceptPendingUser(acceptData: {
     managerId: number;
@@ -73,10 +93,12 @@ export class TournamentService {
   }) {
     const { tournId, managerId, pendingUserId: userId } = acceptData;
 
-    const pendingInstance = await this.obtainPendingInstance(tournId, userId);
-    const tournament = await this.obtainTournamentByUser(tournId, managerId);
+    const pendingInstance = await this.joinPendingAndTourn(tournId, userId);
+    //TODO: look into doing joining logic with query builder instead of making two query calls.
 
-    const tournamentType = tournament.tournamentType;
+    const tournamentType = pendingInstance.tourn.tournamentType;
+    const realManagerId = pendingInstance.tourn.userId;
+    this.checkId(managerId, realManagerId);
 
     //TODO: convert this logic to a transaction
     const addParticipantPromise = this.addParticipantToTournament({
