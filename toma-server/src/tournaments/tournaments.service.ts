@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
+import { Propagation, Transactional } from "typeorm-transactional-cls-hooked";
 import CreateTournamentDTO from "./dto/createTournament.dto";
 import { PendingMember } from "./entities/pendingMember.entity";
 import { Tournament } from "./entities/tournament.entity";
@@ -23,7 +24,7 @@ export class TournamentService {
     await this.tournamentRepository.save(newTournament);
     return newTournament;
   }
-  //TODO: Make this generic so that it can process both participant names and userids
+  @Transactional({ propagation: Propagation.SUPPORTS })
   async addParticipantToTournament(participantData: {
     tournamentType: TournamentVariants;
     participantName?: string;
@@ -81,9 +82,25 @@ export class TournamentService {
   private checkId(userId: number, realId: number) {
     if (userId !== realId)
       throw new HttpException(
-        "User and Tournament combination do not match",
+        "Authenticated User does not permitted user for this request",
         HttpStatus.NOT_FOUND,
       );
+  }
+  @Transactional()
+  private async deletePending_addUser_transaction(
+    pendingInstanceId: number,
+    userId: number,
+    tournId: number,
+    tournamentType: TournamentVariants,
+  ) {
+    await Promise.all([
+      this.pendingRepository.delete(pendingInstanceId),
+      this.addParticipantToTournament({
+        tournamentType,
+        userId,
+        tournId,
+      }),
+    ]);
   }
   //TODO: Extract pending repository logic to another service
   async acceptPendingUser(acceptData: {
@@ -100,16 +117,22 @@ export class TournamentService {
     const realManagerId = pendingInstance.tourn.userId;
     this.checkId(managerId, realManagerId);
 
-    //TODO: convert this logic to a transaction
-    const addParticipantPromise = this.addParticipantToTournament({
-      tournamentType,
+    await this.deletePending_addUser_transaction(
+      pendingInstance.id,
       userId,
       tournId,
-    });
-    const deleteFromPendingPromise = this.pendingRepository.delete(
-      pendingInstance.id,
+      tournamentType,
     );
-    await Promise.all([deleteFromPendingPromise, addParticipantPromise]);
+    // //TODO: convert this logic to a transaction
+    // const addParticipantPromise = this.addParticipantToTournament({
+    //   tournamentType,
+    //   userId,
+    //   tournId,
+    // });
+    // const deleteFromPendingPromise = this.pendingRepository.delete(
+    //   pendingInstance.id,
+    // );
+    // await Promise.all([deleteFromPendingPromise, addParticipantPromise]);
     return {
       status: "User Added",
       userId,
