@@ -41,7 +41,7 @@ export class TournamentService {
     await this.pendingRepository.save(pendingUser);
     return pendingUser;
   }
-  private async obtainPendingInstance(tournId: number, userId: number) {
+  private async obtainPendingInstance(userId: number, tournId: number) {
     const pendingInstance = await this.pendingRepository.findOne({
       tournId,
       userId,
@@ -54,7 +54,7 @@ export class TournamentService {
     return pendingInstance;
   }
 
-  private async joinPendingAndTourn(tournId: number, userId: number) {
+  private async joinPendingAndTourn(userId: number, tournId: number) {
     const pendingTournInstance = await this.pendingRepository.findOne(
       { tournId, userId },
       { relations: ["tourn"] },
@@ -67,18 +67,7 @@ export class TournamentService {
     }
     return pendingTournInstance;
   }
-  private async obtainTournamentByUser(tournId: number, userId: number) {
-    const tournament = await this.tournamentRepository.findOne({
-      id: tournId,
-      userId,
-    });
-    if (!tournament)
-      throw new HttpException(
-        "User and Tournament combination do not match",
-        HttpStatus.NOT_FOUND,
-      );
-    return tournament;
-  }
+
   private checkId(userId: number, realId: number) {
     if (userId !== realId)
       throw new HttpException(
@@ -103,6 +92,7 @@ export class TournamentService {
     ]);
   }
   //TODO: Extract pending repository logic to another service
+  //TODO: send message to user that the tournament was accepted
   async acceptPendingUser(acceptData: {
     managerId: number;
     tournId: number;
@@ -110,8 +100,7 @@ export class TournamentService {
   }) {
     const { tournId, managerId, pendingUserId: userId } = acceptData;
 
-    const pendingInstance = await this.joinPendingAndTourn(tournId, userId);
-    //TODO: look into doing joining logic with query builder instead of making two query calls.
+    const pendingInstance = await this.joinPendingAndTourn(userId, tournId);
 
     const tournamentType = pendingInstance.tourn.tournamentType;
     const realManagerId = pendingInstance.tourn.userId;
@@ -123,20 +112,16 @@ export class TournamentService {
       tournId,
       tournamentType,
     );
-    // //TODO: convert this logic to a transaction
-    // const addParticipantPromise = this.addParticipantToTournament({
-    //   tournamentType,
-    //   userId,
-    //   tournId,
-    // });
-    // const deleteFromPendingPromise = this.pendingRepository.delete(
-    //   pendingInstance.id,
-    // );
-    // await Promise.all([deleteFromPendingPromise, addParticipantPromise]);
     return {
       status: "User Added",
       userId,
       tournId,
     };
+  }
+  //TODO: send a message to the user that the user has been removed
+  async rejectPendingUser(userId: number, tournId: number) {
+    const pendingInstance = await this.obtainPendingInstance(userId, tournId);
+    await this.pendingRepository.delete(pendingInstance.id);
+    return "Success";
   }
 }

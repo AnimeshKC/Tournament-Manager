@@ -11,6 +11,8 @@ import RequestWithUser from "src/auth/requestWithUser.interface";
 import { TournamentService } from "./tournaments.service";
 import { TournamentVariants } from "./types/tournamentVariants.enum";
 import { PostgresErrorInterceptor } from "./../errorHandling/interceptors/postgresError.interceptor";
+
+//TODO: partition to tourn-manager and tourn-user
 @Controller("tourn")
 @UseInterceptors(PostgresErrorInterceptor)
 export class TournController {
@@ -58,5 +60,17 @@ export class TournController {
       managerId,
       ...acceptBody,
     });
+  }
+  @UseGuards(JwtAuthGuard)
+  @Post("rejectPending")
+  async rejectPending(
+    @Body() acceptBody: { tournId: number; pendingUserId: number },
+    @Req() request: RequestWithUser,
+  ) {
+    const managerId = request.user.id;
+    return this.tournamentService.rejectPendingUser(
+      acceptBody.pendingUserId,
+      acceptBody.tournId,
+    );
   }
 }
