@@ -39,7 +39,7 @@ export class SingleElimMember {
   @JoinColumn({ name: "userId" })
   user: User;
 
-  @Column({ type: "integer", default: 0 })
+  @Column({ type: "integer", nullable: true })
   roundEliminated: number;
   @Column({ type: "integer", default: 0 })
   seedValue: number;
