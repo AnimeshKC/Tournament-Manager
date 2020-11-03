@@ -1,4 +1,4 @@
-interface SeedObject {
+export interface SeedObject {
   seedValue?: number;
   [propName: string]: any;
 }
@@ -29,12 +29,12 @@ with an assigned seeding.
 Potential Consideration: add logic for pre-tournament rankings, e.g. ELO
 
 */
-function assignSeedValues(membersList: SeedObject[]) {
+export function assignSeedValues(memberList: SeedObject[]) {
   //shuffle so that order of members in DB does not matter for seeding
   //this may not be needed if seeding is done with some rating
-  shuffleArray(membersList);
+  shuffleArray(memberList);
 
-  const memberSize = membersList.length;
+  const memberSize = memberList.length;
   const tournSize = getTournSize(memberSize);
   let memberIndex = 0;
 
@@ -45,35 +45,15 @@ function assignSeedValues(membersList: SeedObject[]) {
   so that the byes are settled in the first round  
   */
   for (let i = 0; i < Math.floor(tournSize / 2); i++) {
-    membersList[memberIndex].seedValue = 1 + i * 2;
+    memberList[memberIndex].seedValue = 1 + i * 2;
     memberIndex++;
   }
 
   //Any remaining members will fill up corresponding right seeds of matches e.g. 2,4,6,8
   let i = 0;
   while (memberIndex < memberSize) {
-    membersList[memberIndex].seedValue = 2 + i * 2;
+    memberList[memberIndex].seedValue = 2 + i * 2;
     memberIndex++;
     i++;
   }
-
-  //for verification purposes
-  console.log(membersList);
 }
-
-const membersList: SeedObject[] = [
-  { pname: "p1" },
-  { pname: "p2" },
-  { pname: "p3" },
-  { pname: "p4" },
-  { pname: "p5" },
-  { uid: 6 },
-  { pname: "p7" },
-  { uid: 8 },
-  { uid: 9 },
-];
-for (const member of membersList) {
-  member.seedValue = 0;
-}
-
-assignSeedValues(membersList);
