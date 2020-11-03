@@ -4,10 +4,9 @@ interface SingleElimMember {
   uid?: number;
 }
 function getTournSize(memberSize: number) {
-  if (memberSize <= 0) throw new Error("Invalid input");
-  let tournSize = 1;
-  while (memberSize > 0) {
-    memberSize = Math.floor(memberSize / 2);
+  if (memberSize <= 1) throw new Error("Invalid input");
+  let tournSize = 2;
+  while (tournSize < memberSize) {
     tournSize = tournSize * 2;
   }
   return tournSize;
@@ -15,20 +14,17 @@ function getTournSize(memberSize: number) {
 function assignSeedValues(membersList: SingleElimMember[]) {
   const memberSize = membersList.length;
   const tournSize = getTournSize(memberSize);
-
   let memberIndex = 0;
-  for (let i = 0; i < tournSize / 2; i++) {
+  for (let i = 0; i < Math.floor(tournSize / 2); i++) {
     membersList[memberIndex].seedValue = 1 + i * 2;
     memberIndex++;
   }
-  console.log(membersList); //RESUME HERE
   let i = 0;
   while (memberIndex < memberSize) {
     membersList[memberIndex].seedValue = 2 + i * 2;
     memberIndex++;
     i++;
   }
-
   console.log(membersList);
 }
 
@@ -41,9 +37,10 @@ const membersList: SingleElimMember[] = [
   { uid: 6 },
   { pname: "p7" },
   { uid: 8 },
+  { uid: 9 },
 ];
-// console.log(membersList.length)
 for (const member of membersList) {
   member.seedValue = 0;
 }
+
 assignSeedValues(membersList);
