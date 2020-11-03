@@ -6,8 +6,9 @@ import CreateTournamentDTO from "./dto/createTournament.dto";
 import { PendingMember } from "./entities/pendingMember.entity";
 import { Tournament } from "./entities/tournament.entity";
 import { SingleEliminationService } from "./singleElimination.service";
+import { TournamentServiceVariants } from "./types/tournamentServiceVariants.enum";
 import { TournamentVariants } from "./types/tournamentVariants.enum";
-
+import { variantToServiceMap } from "./types/variantsService.map";
 @Injectable()
 export class TournamentService {
   constructor(
@@ -32,9 +33,11 @@ export class TournamentService {
     tournId: number;
   }) {
     const { tournamentType, ...singleElimData } = participantData;
-    if (participantData.tournamentType === "Single Elimination") {
-      return this.singleElimService.addParticipant(singleElimData);
-    }
+
+    //obtains the corresponding service for a tournament type
+    //FUTURE: As more tournaments are added, may need to define an interface for tounrService
+    const tournService = this[variantToServiceMap[tournamentType]];
+    return tournService.addParticipant(singleElimData);
   }
   async addUserToPending(pendingData: { userId: number; tournId: number }) {
     const pendingUser = this.pendingRepository.create(pendingData);
