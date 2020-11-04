@@ -6,7 +6,6 @@ export interface MatchMember {
   participantName?: string;
   userId?: number;
   tournId: number;
-  round: number;
   [propName: string]: any;
 }
 
@@ -37,7 +36,7 @@ function getRoundValue(round: number, seed: number) {
   return Math.ceil(seed / Math.pow(2, round - 1));
 }
 
-function getSoloMatch(member: MatchMember, round: number) {
+function getSoloMatch(member: MatchMember, round: number): MatchObject {
   return {
     tournId: member.tournId,
     userId1: member.userId,
@@ -53,8 +52,6 @@ function getMatchesForRound(
   round: number,
   isSorted = false,
 ) {
-  const memberSize = memberList.length;
-
   const sortedMemberList = isSorted
     ? memberList
     : [...memberList].sort(
@@ -68,6 +65,8 @@ function getMatchesForRound(
   const remainingMembers = sortedMemberList.filter(
     member => !member.roundEliminated || member.roundEliminated >= round,
   );
+  const remainingSize = remainingMembers.length;
+  console.log(remainingMembers);
   let i = 0;
   const matches: MatchObject[] = [];
 
@@ -75,22 +74,12 @@ function getMatchesForRound(
     In the ideal case, i will increment by 2 each time and range from 0 ... memberSize-2
     but there will be edge cases when missing members are involved.
   */
-  while (i < memberSize) {
+  while (i <= remainingSize - 2) {
+    // console.log(matches);
     const leftMember = remainingMembers[i];
-
-    if (i === memberSize - 1) {
-      matches.push(getSoloMatch(leftMember, round));
-      return matches;
-    }
     const rightMember = remainingMembers[i + 1];
-    const {
-      seedValue: rightSeed,
-      userId: userId2,
-      participantName: participantName2,
-    } = rightMember;
-
     const leftRoundValue = getRoundValue(round, leftMember.seedValue);
-    const rightRoundValue = getRoundValue(round, rightSeed);
+    const rightRoundValue = getRoundValue(round, rightMember.seedValue);
 
     const isAMatch = leftRoundValue === rightRoundValue - 1;
     if (isAMatch) {
@@ -108,6 +97,9 @@ function getMatchesForRound(
       i++;
     }
   }
+  if (i === remainingSize - 1) {
+    matches.push(getSoloMatch(remainingMembers[i], round));
+  }
   return matches;
 }
 
@@ -117,21 +109,44 @@ const memberList: SeedObject[] = [
   { participantName: "p3" },
   { participantName: "p4" },
   { participantName: "p5" },
-  //   { userId: 6 },
-  //   { participantName: "p7" },
-  //   { userId: 8 },
+  { userId: 6 },
+  { participantName: "p7" },
+  { userId: 8 },
 ];
 
 const seededMemberList: MatchMember[] = memberList.map(member => ({
   ...member,
   seedValue: 0,
-  round: 1,
   tournId: 1,
 }));
 
 assignSeedValues(seededMemberList);
+//for the test purposes, sort the list so that the matches are already paired up
+seededMemberList.sort(
+  (member1, member2) => member1.seedValue - member2.seedValue,
+);
 
-console.log(getMatchesForRound(seededMemberList, 1));
+//round 1
+// console.log(getMatchesForRound(seededMemberList, 1, true));
+
+//round 2
+
+seededMemberList[1].roundEliminated = 1;
+seededMemberList[2].roundEliminated = 1;
+seededMemberList[5].roundEliminated = 1;
+seededMemberList[6].roundEliminated = 1;
+// console.log(getMatchesForRound(seededMemberList, 2, true));
+
+//round 3
+
+seededMemberList[0].roundEliminated = 1;
+seededMemberList[7].roundEliminated = 1;
+// console.log(getMatchesForRound(seededMemberList, 3, true));
+
+//winner
+seededMemberList[3].roundEliminated = 1;
+console.log(getMatchesForRound(seededMemberList, 4, true));
+
 // console.log(seededMemberList);
 // for (const member of seededMemberList) {
 //   console.log(
