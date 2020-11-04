@@ -12,6 +12,7 @@ import { TournamentStatus } from "../types/tournamentStatus.enum";
 import { TournamentVariants } from "../types/tournamentVariants.enum";
 import { SingleElimMember } from "./singleElimMember.entity";
 import { PendingMember } from "./pendingMember.entity";
+import { Matches } from "./matches.entity";
 
 @Entity()
 export class Tournament {
@@ -62,4 +63,10 @@ export class Tournament {
   joinable: boolean;
   @Column({ type: "integer", default: 0 })
   currentRound: number;
+
+  @OneToMany(
+    () => Matches,
+    match => match.tourn,
+  )
+  matches: Matches;
 }
