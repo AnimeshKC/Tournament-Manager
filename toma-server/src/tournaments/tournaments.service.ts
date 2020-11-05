@@ -23,13 +23,11 @@ export class TournamentService {
     name: string;
     tournamentType: TournamentVariants;
   }): Promise<Tournament> {
-    const newTournament = this.tournamentRepository.create(creationData);
+    const newTournament = await this.tournamentRepository.save(
+      this.tournamentRepository.create(creationData),
+    );
     const tournService = this[variantToServiceMap[creationData.tournamentType]];
-
-    await Promise.all([
-      this.tournamentRepository.save(newTournament),
-      tournService.createDetails(newTournament.id),
-    ]);
+    await tournService.createDetails(newTournament.id);
     return newTournament;
   }
   @Transactional({ propagation: Propagation.SUPPORTS })

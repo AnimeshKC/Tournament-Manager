@@ -10,6 +10,7 @@ export class SingleEliminationService {
   constructor(
     @InjectRepository(SingleElimMember)
     private singleElimRepository: Repository<SingleElimMember>,
+    @InjectRepository(SingleElimDetails)
     private singleElimDetails: Repository<SingleElimDetails>,
   ) {}
 
@@ -33,8 +34,7 @@ export class SingleEliminationService {
   }
   @Transactional({ propagation: Propagation.SUPPORTS })
   async createDetails(tournId: number) {
-    await this.singleElimDetails.save(
-      this.singleElimDetails.create({ tournId }),
-    );
+    const detail = this.singleElimDetails.create({ tournId });
+    await this.singleElimDetails.save(detail);
   }
 }
