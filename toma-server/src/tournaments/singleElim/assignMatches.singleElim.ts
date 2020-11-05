@@ -18,18 +18,6 @@ export interface MatchObject {
   round: number;
   matchNumber: number;
 }
-//throws an error if round isn't valid for the number of members
-//Ex. A round 3 is only possible if more than 4 members are in the tournament
-function validateNaturalNumber(num: number) {
-  // const validRound = Number.isInteger(num) && num > 0;
-  // if (!validRound) throw new Error("Invalid Round");
-}
-
-function getRoundValue(round: number, seed: number) {
-  validateNaturalNumber(round);
-  validateNaturalNumber(seed);
-  return Math.ceil(seed / Math.pow(2, round - 1));
-}
 
 function generateFirstMatchMember({
   member,
@@ -130,20 +118,26 @@ const memberList: SeedObject[] = [
   { userId: 8 },
 ];
 
-const seededMemberList: MatchMember[] = memberList.map(member => ({
+let seededMemberList: MatchMember[] = memberList.map(member => ({
   ...member,
   seedValue: 0,
   tournId: 1,
 }));
 
 assignSeedValues(seededMemberList);
-//for the test purposes, sort the list so that the matches are already paired up
+//sort for easier testing
 seededMemberList.sort(
   (member1, member2) => member1.seedValue - member2.seedValue,
 );
 
+function filterEliminatedMembers(memberList: MatchMember[]) {
+  return memberList.filter(member => !member.roundEliminated);
+}
+
 //round 1
-// console.log(getMatchesForRound(seededMemberList, 1, true));
+// console.log(
+//   getMatchesForRound({ memberList: seededMemberList, round: 1, tournSize: 8 }),
+// );
 
 //round 2
 
@@ -151,29 +145,26 @@ seededMemberList[1].roundEliminated = 1;
 seededMemberList[2].roundEliminated = 1;
 seededMemberList[5].roundEliminated = 1;
 seededMemberList[6].roundEliminated = 1;
-// console.log(getMatchesForRound(seededMemberList, 2, true));
 
+seededMemberList = filterEliminatedMembers(seededMemberList);
+
+// console.log(
+//   getMatchesForRound({ memberList: seededMemberList, round: 2, tournSize: 8 }),
+// );
 //round 3
 
-seededMemberList[0].roundEliminated = 1;
-seededMemberList[7].roundEliminated = 1;
-// console.log(getMatchesForRound(seededMemberList, 3, true));
+seededMemberList[0].roundEliminated = 2;
+seededMemberList[3].roundEliminated = 2;
+seededMemberList = filterEliminatedMembers(seededMemberList);
 
-//winner
-seededMemberList[3].roundEliminated = 1;
 // console.log(
-//   getMatchesForRound({
-//     memberList: seededMemberList,
-//     round: 4,
-//     tournSize: true,
-//   }),
+//   getMatchesForRound({ memberList: seededMemberList, round: 3, tournSize: 8 }),
 // );
 
-// console.log(seededMemberList);
-// for (const member of seededMemberList) {
-//   console.log(
-//     getRoundValue(1, member.seedValue),
-//     getRoundValue(2, member.seedValue),
-//     getRoundValue(3, member.seedValue),
-//   );
-// }
+//winner
+seededMemberList[0].roundEliminated = 1;
+seededMemberList = filterEliminatedMembers(seededMemberList);
+
+console.log(
+  getMatchesForRound({ memberList: seededMemberList, round: 4, tournSize: 8 }),
+);
