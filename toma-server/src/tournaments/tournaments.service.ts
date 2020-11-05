@@ -18,11 +18,18 @@ export class TournamentService {
     private pendingRepository: Repository<PendingMember>,
     private singleElimService: SingleEliminationService,
   ) {}
-  async createTournament(
-    creationData: CreateTournamentDTO,
-  ): Promise<Tournament> {
+  async createTournament(creationData: {
+    userId: number;
+    name: string;
+    tournamentType: TournamentVariants;
+  }): Promise<Tournament> {
     const newTournament = this.tournamentRepository.create(creationData);
-    await this.tournamentRepository.save(newTournament);
+    const tournService = this[variantToServiceMap[creationData.tournamentType]];
+
+    await Promise.all([
+      this.tournamentRepository.save(newTournament),
+      tournService.createDetails(newTournament.id),
+    ]);
     return newTournament;
   }
   @Transactional({ propagation: Propagation.SUPPORTS })

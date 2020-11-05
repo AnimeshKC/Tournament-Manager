@@ -20,7 +20,7 @@ export class TournController {
   @UseGuards(JwtAuthGuard)
   @Post("create")
   async createTourn(
-    @Body() creationData: { name: string; type: TournamentVariants },
+    @Body() creationData: { name: string; tournamentType: TournamentVariants },
     @Req() request: RequestWithUser,
   ) {
     const userId = request.user.id;
