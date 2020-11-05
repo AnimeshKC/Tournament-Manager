@@ -16,6 +16,7 @@ export interface MatchObject {
   participantName2?: string;
   tournId: number;
   round: number;
+  matchNumber: number;
 }
 //throws an error if round isn't valid for the number of members
 //Ex. A round 3 is only possible if more than 4 members are in the tournament
@@ -24,19 +25,21 @@ function validateNaturalNumber(num: number) {
   // if (!validRound) throw new Error("Invalid Round");
 }
 
-function validateRoundForSize(round: number, memberSize: number) {
-  validateNaturalNumber(round);
-  if (memberSize * 2 <= Math.pow(2, round))
-    throw new Error("Round exceeds bound for this size of members");
-}
-
 function getRoundValue(round: number, seed: number) {
   validateNaturalNumber(round);
   validateNaturalNumber(seed);
   return Math.ceil(seed / Math.pow(2, round - 1));
 }
 
-function getSoloMatch(member: MatchMember, round: number): MatchObject {
+function generateFirstMatchMember({
+  member,
+  round,
+  matchNumber,
+}: {
+  member: MatchMember;
+  round: number;
+  matchNumber: number;
+}): MatchObject {
   return {
     tournId: member.tournId,
     userId1: member.userId,
@@ -44,62 +47,75 @@ function getSoloMatch(member: MatchMember, round: number): MatchObject {
     participantName2: null,
     userId2: null,
     round,
+    matchNumber,
+  };
+}
+function generateSecondMatchMember(
+  oldMatchObj: MatchObject,
+  newMember: MatchMember,
+) {
+  return {
+    ...oldMatchObj,
+    participantName2: newMember.participantName,
+    userId2: newMember.userId,
   };
 }
 
-function getMatchesForRound(
-  memberList: MatchMember[],
-  round: number,
-  isSorted = false,
-) {
-  const sortedMemberList = isSorted
-    ? memberList
-    : [...memberList].sort(
-        (member1, member2) => member1.seedValue - member2.seedValue,
-      );
-
-  /*if member.roundEliminated is null, user has not been eliminated*/
-  /*Second condition is in case the function is being called for a round that has already 
-  passed. Members eliminated in later rounds are not filtered out
-    */
-  const remainingMembers = sortedMemberList.filter(
-    member => !member.roundEliminated || member.roundEliminated >= round,
-  );
-  const remainingSize = remainingMembers.length;
-  console.log(remainingMembers);
-  let i = 0;
-  const matches: MatchObject[] = [];
-
+function getMatchNumber({
+  seedValue,
+  round,
+  tournSize,
+}: {
+  seedValue: number;
+  round: number;
+  tournSize: number;
+}) {
   /*
-    In the ideal case, i will increment by 2 each time and range from 0 ... memberSize-2
-    but there will be edge cases when missing members are involved.
+  Second-half seedValues have the same matchNumber as their first-half counterparts
+  ex. in a 16 person tournament:
+    (<matchNumber>, [<lowerSeed>,<higherSeed>]) ->
+     [(1, [1, 16]), (2, [2, 15], ... (8, [8, 9]))
   */
-  while (i <= remainingSize - 2) {
-    // console.log(matches);
-    const leftMember = remainingMembers[i];
-    const rightMember = remainingMembers[i + 1];
-    const leftRoundValue = getRoundValue(round, leftMember.seedValue);
-    const rightRoundValue = getRoundValue(round, rightMember.seedValue);
+  const firstRoundNumber =
+    seedValue <= tournSize / 2 ? seedValue : tournSize - seedValue + 1;
 
-    const isAMatch = leftRoundValue === rightRoundValue - 1;
-    if (isAMatch) {
-      matches.push({
-        userId1: leftMember.userId,
-        participantName1: leftMember.participantName,
-        participantName2: rightMember.participantName,
-        userId2: rightMember.userId,
-        tournId: leftMember.tournId,
+  //e.g. winner of the 8th match of round 1 will be in the 4th match of round 2 and the 2nd match of round 3
+  const matchNumber = Math.ceil(firstRoundNumber / Math.pow(2, round - 1));
+
+  return matchNumber;
+}
+//database should have already filtered out the members who have been eliminated
+function getMatchesForRound({
+  memberList,
+  round,
+  tournSize,
+}: {
+  memberList: MatchMember[];
+  round: number;
+  tournSize: number;
+}) {
+  const rankMap: Record<number, MatchObject> = {};
+
+  for (const member of memberList) {
+    const matchNumber = getMatchNumber({
+      seedValue: member.seedValue,
+      tournSize,
+      round,
+    });
+    if (matchNumber in rankMap) {
+      rankMap[matchNumber] = generateSecondMatchMember(
+        rankMap[matchNumber],
+        member,
+      );
+    } else
+      rankMap[matchNumber] = generateFirstMatchMember({
+        member,
         round,
+        matchNumber,
       });
-      i += 2;
-    } else {
-      matches.push(getSoloMatch(leftMember, round));
-      i++;
-    }
   }
-  if (i === remainingSize - 1) {
-    matches.push(getSoloMatch(remainingMembers[i], round));
-  }
+  const matches = Object.values(rankMap);
+  matches.sort((a, b) => a.matchNumber - b.matchNumber);
   return matches;
 }
 
@@ -145,7 +161,13 @@ seededMemberList[7].roundEliminated = 1;
 
 //winner
 seededMemberList[3].roundEliminated = 1;
-console.log(getMatchesForRound(seededMemberList, 4, true));
+// console.log(
+//   getMatchesForRound({
+//     memberList: seededMemberList,
+//     round: 4,
+//     tournSize: true,
+//   }),
+// );
 
 // console.log(seededMemberList);
 // for (const member of seededMemberList) {
