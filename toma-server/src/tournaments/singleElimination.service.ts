@@ -54,14 +54,31 @@ export class SingleEliminationService {
   }
   @Transactional()
   async initialize(tournId: number) {
-    const [details, members] = await Promise.all([
+    const [details, tournament] = await Promise.all([
       this.detailsRepository.findOne({ tournId }),
-      this.tournamentService.getTournamentMembers({
+      this.tournamentService.getTournamentWithMembers({
         relationString: MemberVariants.singleElim,
         tournId,
       }),
     ]);
+    const members = tournament.singleElimMembers;
+    if (tournament.currentRound)
+      throw new HttpException(
+        "Cannot initialize a tournament which already began",
+        HttpStatus.BAD_REQUEST,
+      );
     details.tournSize = this.getTournSize(members.length);
-    await this.detailsRepository.save(details);
+
+    //TODO: await this at an appropriate time
+    const detailsPromise = this.detailsRepository.save(details);
+
+    const round = 1;
+    //TODO: await this at an appropriate time
+    const roundUpdatePromise = this.tournamentService.incrementTournamentRound(
+      tournId,
+    );
+
+    //TODO: provide an option in SingleElimDetails for deliberate or blind seeding
+    //NEXT: assign seeds and matches
   }
 }
