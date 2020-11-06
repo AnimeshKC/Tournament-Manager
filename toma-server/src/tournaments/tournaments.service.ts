@@ -6,9 +6,11 @@ import CreateTournamentDTO from "./dto/createTournament.dto";
 import { PendingMember } from "./entities/pendingMember.entity";
 import { Tournament } from "./entities/tournament.entity";
 import { SingleEliminationService } from "./singleElimination.service";
+import { MemberVariants } from "./types/memberTables.enum";
 import { TournamentServiceVariants } from "./types/tournamentServiceVariants.enum";
 import { TournamentVariants } from "./types/tournamentVariants.enum";
 import { variantToServiceMap } from "./types/variantsService.map";
+
 @Injectable()
 export class TournamentService {
   constructor(
@@ -18,6 +20,12 @@ export class TournamentService {
     private pendingRepository: Repository<PendingMember>,
     private singleElimService: SingleEliminationService,
   ) {}
+  private getServiceByTournType(tournType: TournamentVariants) {
+    return this[variantToServiceMap[tournType]];
+  }
+
+  //TODO: incorporate a set of options parameter that can be passed to type of tournament service
+  @Transactional()
   async createTournament(creationData: {
     userId: number;
     name: string;
@@ -26,8 +34,9 @@ export class TournamentService {
     const newTournament = await this.tournamentRepository.save(
       this.tournamentRepository.create(creationData),
     );
-    const tournService = this[variantToServiceMap[creationData.tournamentType]];
-    await tournService.createDetails(newTournament.id);
+    await this.getServiceByTournType(creationData.tournamentType).createDetails(
+      newTournament.id,
+    );
     return newTournament;
   }
   @Transactional({ propagation: Propagation.SUPPORTS })
@@ -41,8 +50,9 @@ export class TournamentService {
 
     //obtains the corresponding service for a tournament type
     //FUTURE: As more tournaments are added, may need to define an interface for tounrService
-    const tournService = this[variantToServiceMap[tournamentType]];
-    return tournService.addParticipant(singleElimData);
+    return this.getServiceByTournType(tournamentType).addParticipant(
+      singleElimData,
+    );
   }
   async addUserToPending(pendingData: { userId: number; tournId: number }) {
     const pendingUser = this.pendingRepository.create(pendingData);
@@ -62,6 +72,19 @@ export class TournamentService {
     return pendingInstance;
   }
 
+  public async getTournamentMembers({
+    relationString,
+    tournId,
+  }: {
+    relationString: MemberVariants;
+    tournId: number;
+  }) {
+    const tournament = await this.tournamentRepository.findOne(
+      { id: tournId },
+      { relations: [relationString] },
+    );
+    return tournament[relationString];
+  }
   private async joinPendingAndTourn(userId: number, tournId: number) {
     const pendingTournInstance = await this.pendingRepository.findOne(
       { tournId, userId },
@@ -131,5 +154,15 @@ export class TournamentService {
     const pendingInstance = await this.obtainPendingInstance(userId, tournId);
     await this.pendingRepository.delete(pendingInstance.id);
     return "Success";
+  }
+  @Transactional()
+  async startTournament(tournId: number) {
+    /*All pending members not accepted to the tournament should be cleared for a starting tournament*/
+    const pendingMembers = await this.pendingRepository.find({ tournId });
+    await this.pendingRepository.remove(pendingMembers);
+
+    const tournamentType = (await this.tournamentRepository.findOne(tournId))
+      .tournamentType;
+    return this.getServiceByTournType(tournamentType);
   }
 }
