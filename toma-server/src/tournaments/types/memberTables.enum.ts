@@ -1,3 +1,3 @@
 export enum MemberVariants {
-  singleElimMembers = "singleElimMembers",
+  singleElim = "singleElimMembers",
 }
