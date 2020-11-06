@@ -57,4 +57,7 @@ export class Matches {
 
   @Column({ type: "integer", nullable: false })
   round: number;
+
+  @Column({ type: "integer", nullable: false })
+  matchNumber: number;
 }
