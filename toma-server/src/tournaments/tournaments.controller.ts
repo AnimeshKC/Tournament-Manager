@@ -15,9 +15,9 @@ import { PostgresErrorInterceptor } from "./../errorHandling/interceptors/postgr
 //TODO: partition to tourn-manager and tourn-user
 @Controller("tourn")
 @UseInterceptors(PostgresErrorInterceptor)
+@UseGuards(JwtAuthGuard)
 export class TournController {
   constructor(private readonly tournamentService: TournamentService) {}
-  @UseGuards(JwtAuthGuard)
   @Post("create")
   async createTourn(
     @Body() creationData: { name: string; tournamentType: TournamentVariants },
@@ -37,7 +37,6 @@ export class TournController {
   ) {
     return this.tournamentService.addParticipantToTournament(participantData);
   }
-  @UseGuards(JwtAuthGuard)
   @Post("addPending")
   async addPending(
     @Body() pendingBody: { tournId: number },
@@ -49,7 +48,6 @@ export class TournController {
       tournId: pendingBody.tournId,
     });
   }
-  @UseGuards(JwtAuthGuard)
   @Post("acceptPending")
   async acceptPending(
     @Body() acceptBody: { tournId: number; pendingUserId: number },
@@ -61,16 +59,17 @@ export class TournController {
       ...acceptBody,
     });
   }
-  @UseGuards(JwtAuthGuard)
   @Post("rejectPending")
   async rejectPending(
     @Body() acceptBody: { tournId: number; pendingUserId: number },
-    @Req() request: RequestWithUser,
   ) {
-    const managerId = request.user.id;
     return this.tournamentService.rejectPendingUser(
       acceptBody.pendingUserId,
       acceptBody.tournId,
     );
+  }
+  @Post("rejectPending")
+  async startTournament(@Body() { tournId }: { tournId: number }) {
+    return this.tournamentService.startTournament(tournId);
   }
 }
