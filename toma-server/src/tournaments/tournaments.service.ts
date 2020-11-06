@@ -71,8 +71,12 @@ export class TournamentService {
       );
     return pendingInstance;
   }
-
-  public async getTournamentMembers({
+  public async incrementTournamentRound(tournId) {
+    const tournament = await this.tournamentRepository.findOne(tournId);
+    tournament.currentRound++;
+    await this.tournamentRepository.save(tournament);
+  }
+  public async getTournamentWithMembers({
     relationString,
     tournId,
   }: {
@@ -83,7 +87,7 @@ export class TournamentService {
       { id: tournId },
       { relations: [relationString] },
     );
-    return tournament[relationString];
+    return tournament;
   }
   private async joinPendingAndTourn(userId: number, tournId: number) {
     const pendingTournInstance = await this.pendingRepository.findOne(
