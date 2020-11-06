@@ -37,4 +37,9 @@ export class SingleEliminationService {
     const detail = this.singleElimDetails.create({ tournId });
     await this.singleElimDetails.save(detail);
   }
+  @Transactional({ propagation: Propagation.SUPPORTS })
+  async initialize(tournId: number) {
+    const details = await this.singleElimDetails.findOne({ tournId });
+    // details.tournSize = await this.singleElimRepository.
+  }
 }
