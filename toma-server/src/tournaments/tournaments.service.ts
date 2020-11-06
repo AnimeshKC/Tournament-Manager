@@ -161,12 +161,12 @@ export class TournamentService {
   }
   @Transactional()
   async startTournament(tournId: number) {
-    /*All pending members not accepted to the tournament should be cleared for a starting tournament*/
+    /*All pending members not accepted to the tournament should be cleared*/
     const pendingMembers = await this.pendingRepository.find({ tournId });
     await this.pendingRepository.remove(pendingMembers);
 
     const tournamentType = (await this.tournamentRepository.findOne(tournId))
       .tournamentType;
-    return this.getServiceByTournType(tournamentType);
+    return this.getServiceByTournType(tournamentType).initialize(tournId);
   }
 }
