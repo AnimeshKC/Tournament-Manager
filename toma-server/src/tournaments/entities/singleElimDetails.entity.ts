@@ -13,7 +13,8 @@ export class SingleElimDetails {
   id: number;
   @Column({ nullable: true, type: "integer" })
   tournSize: number;
-
+  @Column({ default: false })
+  isBlindSeed: boolean;
   @Column({ nullable: false, type: "integer" })
   tournId: number;
   @OneToOne(() => Tournament, { nullable: false, onDelete: "CASCADE" })
