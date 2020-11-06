@@ -13,7 +13,7 @@ export class SingleElimDetails {
   id: number;
   @Column({ nullable: true, type: "integer" })
   tournSize: number;
-  @Column({ default: false })
+  @Column({ default: true })
   isBlindSeed: boolean;
   @Column({ nullable: false, type: "integer" })
   tournId: number;
