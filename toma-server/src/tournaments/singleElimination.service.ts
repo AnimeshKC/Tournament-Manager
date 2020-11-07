@@ -145,7 +145,21 @@ export class SingleEliminationService {
       matchNumber,
     });
   }
-
+  private async getTournamentWithMembers(tournId: number) {
+    return this.tournamentService.getTournamentWithMembers({
+      relationString: MemberVariants.singleElim,
+      tournId,
+    });
+  }
+  private async getDetails(tournId: number) {
+    return this.detailsRepository.findOne({ tournId });
+  }
+  private async getDetailsAndTournament(tournId: number) {
+    return Promise.all([
+      this.getDetails(tournId),
+      this.getTournamentWithMembers(tournId),
+    ]);
+  }
   private getMatchObjSecond(
     firstMatchObj: Matches,
     newMember: SingleElimMember,
@@ -161,33 +175,15 @@ export class SingleEliminationService {
     const detail = this.detailsRepository.create({ tournId });
     await this.detailsRepository.save(detail);
   }
-  @Transactional()
-  async initialize(tournId: number) {
-    const [details, tournament] = await Promise.all([
-      this.detailsRepository.findOne({ tournId }),
-      this.tournamentService.getTournamentWithMembers({
-        relationString: MemberVariants.singleElim,
-        tournId,
-      }),
-    ]);
-    const members = tournament.singleElimMembers;
-    if (tournament.currentRound)
+
+  private validatePendingTournament(round: number) {
+    if (round)
       throw new HttpException(
         "Cannot initialize a tournament which already began",
         HttpStatus.BAD_REQUEST,
       );
-    details.tournSize = this.getTournSize(members.length);
-
-    //TODO: await this at an appropriate time
-    const detailsPromise = this.detailsRepository.save(details);
-
-    //TODO: await this at an appropriate time
-    const roundUpdatePromise = this.tournamentService.incrementTournamentRound(
-      tournId,
-    );
-
-    //TODO: provide an option in SingleElimDetails for deliberate or blind seeding
-
+  }
+  private seedMembers(members: SingleElimMember[], details: SingleElimDetails) {
     if (details.isBlindSeed) this.assignBlindSeeds(members);
     else throw new Error("This logic has not yet been implemented");
     const matches = this.getMatchesForRound({
@@ -195,6 +191,26 @@ export class SingleEliminationService {
       round: 1,
       tournSize: details.tournSize,
     });
-    this.matchesRepository.save(matches);
+    return matches;
+  }
+  @Transactional()
+  async initialize(tournId: number) {
+    const [details, tournament] = await this.getDetailsAndTournament(tournId);
+
+    //rest of code only runs if tournament has not yet started
+    this.validatePendingTournament(tournament.currentRound);
+
+    const members = tournament.singleElimMembers;
+    details.tournSize = this.getTournSize(members.length);
+
+    const detailsPromise = this.detailsRepository.save(details);
+
+    const roundUpdatePromise = this.tournamentService.incrementTournamentRound(
+      tournId,
+    );
+    const matches = this.seedMembers(members, details);
+    const matchesPromise = this.matchesRepository.save(matches);
+
+    await Promise.all([detailsPromise, roundUpdatePromise, matchesPromise]);
   }
 }
