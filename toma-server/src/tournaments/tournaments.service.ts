@@ -2,12 +2,9 @@ import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Propagation, Transactional } from "typeorm-transactional-cls-hooked";
-import CreateTournamentDTO from "./dto/createTournament.dto";
 import { PendingMember } from "./entities/pendingMember.entity";
 import { Tournament } from "./entities/tournament.entity";
 import { SingleEliminationService } from "./singleElimination.service";
-import { MemberVariants } from "./types/memberTables.enum";
-import { TournamentServiceVariants } from "./types/tournamentServiceVariants.enum";
 import { TournamentVariants } from "./types/tournamentVariants.enum";
 import { variantToServiceMap } from "./types/variantsService.map";
 
@@ -71,24 +68,7 @@ export class TournamentService {
       );
     return pendingInstance;
   }
-  public async incrementTournamentRound(tournId) {
-    const tournament = await this.tournamentRepository.findOne(tournId);
-    tournament.currentRound++;
-    await this.tournamentRepository.save(tournament);
-  }
-  public async getTournamentWithMembers({
-    relationString,
-    tournId,
-  }: {
-    relationString: MemberVariants;
-    tournId: number;
-  }) {
-    const tournament = await this.tournamentRepository.findOne(
-      { id: tournId },
-      { relations: [relationString] },
-    );
-    return tournament;
-  }
+
   private async joinPendingAndTourn(userId: number, tournId: number) {
     const pendingTournInstance = await this.pendingRepository.findOne(
       { tournId, userId },

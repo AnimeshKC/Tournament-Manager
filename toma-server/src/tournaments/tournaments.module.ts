@@ -10,6 +10,7 @@ import { Tournament } from "./entities/tournament.entity";
 import { SingleEliminationService } from "./singleElimination.service";
 import { TournController } from "./tournaments.controller";
 import { TournamentService } from "./tournaments.service";
+import { TournGenericService } from "./tournGeneric.service";
 
 @Module({
   controllers: [TournController],
@@ -24,6 +25,6 @@ import { TournamentService } from "./tournaments.service";
       SingleElimDetails,
     ]),
   ],
-  providers: [TournamentService, SingleEliminationService],
+  providers: [TournamentService, SingleEliminationService, TournGenericService],
 })
 export class TournamentsModule {}

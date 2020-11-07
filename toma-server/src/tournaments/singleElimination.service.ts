@@ -5,7 +5,7 @@ import { Propagation, Transactional } from "typeorm-transactional-cls-hooked";
 import { Matches } from "./entities/matches.entity";
 import { SingleElimDetails } from "./entities/singleElimDetails.entity";
 import { SingleElimMember } from "./entities/singleElimMember.entity";
-import { TournamentService } from "./tournaments.service";
+import { TournGenericService } from "./tournGeneric.service";
 import { MemberVariants } from "./types/memberTables.enum";
 
 //Most Likely extract this to file in the future
@@ -30,7 +30,7 @@ export class SingleEliminationService {
     private readonly detailsRepository: Repository<SingleElimDetails>,
     @InjectRepository(Matches)
     private readonly matchesRepository: Repository<Matches>,
-    private tournamentService: TournamentService,
+    private tournGenericService: TournGenericService,
   ) {}
 
   @Transactional({ propagation: Propagation.SUPPORTS })
@@ -146,7 +146,7 @@ export class SingleEliminationService {
     });
   }
   private async getTournamentWithMembers(tournId: number) {
-    return this.tournamentService.getTournamentWithMembers({
+    return this.tournGenericService.getTournamentWithMembers({
       relationString: MemberVariants.singleElim,
       tournId,
     });
@@ -206,7 +206,7 @@ export class SingleEliminationService {
   ) {
     const tournId = members[0].tournId;
 
-    const roundUpdatePromise = this.tournamentService.incrementTournamentRound(
+    const roundUpdatePromise = this.tournGenericService.incrementTournamentRound(
       tournId,
     );
     const matches = this.seedMembers(members, details);
