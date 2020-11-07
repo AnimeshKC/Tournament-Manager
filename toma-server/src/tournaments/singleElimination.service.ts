@@ -193,24 +193,52 @@ export class SingleEliminationService {
     });
     return matches;
   }
-  @Transactional()
-  async initialize(tournId: number) {
-    const [details, tournament] = await this.getDetailsAndTournament(tournId);
-
-    //rest of code only runs if tournament has not yet started
-    this.validatePendingTournament(tournament.currentRound);
-
-    const members = tournament.singleElimMembers;
-    details.tournSize = this.getTournSize(members.length);
-
-    const detailsPromise = this.detailsRepository.save(details);
+  private validateStartedTournament(round: number) {
+    if (!round)
+      throw new HttpException(
+        "Tournament Must have begun",
+        HttpStatus.BAD_REQUEST,
+      );
+  }
+  private async writeMatchesForRound(
+    members: SingleElimMember[],
+    details: SingleElimDetails,
+  ) {
+    const tournId = members[0].tournId;
 
     const roundUpdatePromise = this.tournamentService.incrementTournamentRound(
       tournId,
     );
     const matches = this.seedMembers(members, details);
     const matchesPromise = this.matchesRepository.save(matches);
+    await Promise.all([roundUpdatePromise, matchesPromise]);
+    return matches;
+  }
+  async serviceNextRound(tournId: number) {
+    const [details, tournament] = await this.getDetailsAndTournament(tournId);
 
-    await Promise.all([detailsPromise, roundUpdatePromise, matchesPromise]);
+    /* need to ensure tournament round is greater than 0;
+    otherwise, tournSize will be null, and initialize should have been called instead */
+    this.validateStartedTournament(tournament.currentRound);
+
+    const members = tournament.singleElimMembers;
+    const matches = await this.writeMatchesForRound(members, details);
+    return matches;
+  }
+  @Transactional()
+  async initialize(tournId: number) {
+    const [details, tournament] = await this.getDetailsAndTournament(tournId);
+
+    /*     If tournament has already started, this function shouldn't be called
+    so an error will be thrown */
+    this.validatePendingTournament(tournament.currentRound);
+
+    const members = tournament.singleElimMembers;
+    details.tournSize = this.getTournSize(members.length);
+    const [_, matches] = await Promise.all([
+      this.detailsRepository.save(details),
+      this.writeMatchesForRound(members, details),
+    ]);
+    return matches;
   }
 }
