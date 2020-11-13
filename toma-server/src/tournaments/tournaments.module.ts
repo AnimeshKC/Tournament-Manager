@@ -7,6 +7,7 @@ import { PendingMember } from "./entities/pendingMember.entity";
 import { SingleElimDetails } from "./entities/singleElimDetails.entity";
 import { SingleElimMember } from "./entities/singleElimMember.entity";
 import { Tournament } from "./entities/tournament.entity";
+import { PendingService } from "./pending.service";
 import { SingleEliminationService } from "./singleElimination.service";
 import { TournController } from "./tournaments.controller";
 import { TournamentService } from "./tournaments.service";
@@ -25,6 +26,11 @@ import { TournGenericService } from "./tournGeneric.service";
       SingleElimDetails,
     ]),
   ],
-  providers: [TournamentService, SingleEliminationService, TournGenericService],
+  providers: [
+    TournamentService,
+    SingleEliminationService,
+    TournGenericService,
+    PendingService,
+  ],
 })
 export class TournamentsModule {}
