@@ -18,22 +18,22 @@ export class PendingService {
     await this.pendingRepository.save(pendingUser);
     return pendingUser;
   }
-  private async joinPendingAndTourn(userId: number, tournId: number) {
-    const pendingTournInstance = await this.pendingRepository.findOne(
+  private async getPendingWithTourn(userId: number, tournId: number) {
+    const pendingWithTourn = await this.pendingRepository.findOne(
       { tournId, userId },
       { relations: ["tourn"] },
     );
-    if (!pendingTournInstance?.tourn) {
+    if (!pendingWithTourn?.tourn) {
       throw new HttpException(
         "The requested pending user cannot be found",
         HttpStatus.NOT_FOUND,
       );
     }
-    return pendingTournInstance;
+    return pendingWithTourn;
   }
 
   @Transactional()
-  private async deletePending_addUser_transaction(
+  private async writeAcceptTransactions(
     pendingInstanceId: number,
     userId: number,
     tournId: number,
@@ -48,18 +48,16 @@ export class PendingService {
       }),
     ]);
   }
-  async acceptPendingUser(acceptData: {
-    managerId: number;
+  async acceptPendingUser({
+    tournId,
+    pendingUserId: userId,
+  }: {
     tournId: number;
     pendingUserId: number;
   }) {
-    const { tournId, managerId, pendingUserId: userId } = acceptData;
-
-    const pendingInstance = await this.joinPendingAndTourn(userId, tournId);
-
+    const pendingInstance = await this.getPendingWithTourn(userId, tournId);
     const tournamentType = pendingInstance.tourn.tournamentType;
-
-    await this.deletePending_addUser_transaction(
+    await this.writeAcceptTransactions(
       pendingInstance.id,
       userId,
       tournId,

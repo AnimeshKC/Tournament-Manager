@@ -55,11 +55,8 @@ export class TournController {
   @Post("acceptPending")
   async acceptPending(
     @Body() acceptBody: { tournId: number; pendingUserId: number },
-    @Req() request: RequestWithUser,
   ) {
-    const managerId = request.user.id;
     return this.pendingService.acceptPendingUser({
-      managerId,
       ...acceptBody,
     });
   }
