@@ -11,15 +11,15 @@ export class TournGenericService {
     private readonly tournamentRepository: Repository<Tournament>,
   ) {}
   public async getTournamentWithMembers({
-    relationString,
+    memberTableString,
     tournId,
   }: {
-    relationString: MemberVariants;
+    memberTableString: MemberVariants;
     tournId: number;
   }) {
     const tournament = await this.tournamentRepository.findOne(
       { id: tournId },
-      { relations: [relationString] },
+      { relations: [memberTableString] },
     );
     return tournament;
   }

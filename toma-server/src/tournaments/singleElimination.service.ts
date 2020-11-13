@@ -147,7 +147,7 @@ export class SingleEliminationService {
   }
   private async getTournamentWithMembers(tournId: number) {
     return this.tournGenericService.getTournamentWithMembers({
-      relationString: MemberVariants.singleElim,
+      memberTableString: MemberVariants.singleElim,
       tournId,
     });
   }
