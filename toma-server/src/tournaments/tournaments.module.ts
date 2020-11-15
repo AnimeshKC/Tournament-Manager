@@ -12,19 +12,19 @@ import { SingleEliminationService } from "./singleElimination.service";
 import { TournController } from "./tournaments.controller";
 import { TournamentService } from "./tournaments.service";
 import { TournGenericService } from "./tournGeneric.service";
-
+export const tournamentModuleEntities = [
+  Tournament,
+  SingleElimMember,
+  PendingMember,
+  Matches,
+  SingleElimDetails,
+];
 @Module({
   controllers: [TournController],
   imports: [
     UsersModule,
     AuthModule,
-    TypeOrmModule.forFeature([
-      Tournament,
-      SingleElimMember,
-      PendingMember,
-      Matches,
-      SingleElimDetails,
-    ]),
+    TypeOrmModule.forFeature(tournamentModuleEntities),
   ],
   providers: [
     TournamentService,

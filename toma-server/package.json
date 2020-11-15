@@ -50,6 +50,7 @@
     "passport-local": "^1.0.0",
     "pg": "^8.3.3",
     "pg-connection-string": "^2.3.0",
+    "pg-mem": "^1.1.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.5.4",
