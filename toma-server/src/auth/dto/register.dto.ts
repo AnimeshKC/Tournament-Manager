@@ -1,5 +1,5 @@
 import { IsEmail, Matches, MaxLength, MinLength } from "class-validator";
-import { Match } from "src/decorators/match.decorator";
+import { Match } from "../../decorators/match.decorator";
 
 export default class RegisterDTO {
   @IsEmail({}, { message: "email: not a valid address" })

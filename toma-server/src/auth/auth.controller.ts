@@ -13,7 +13,7 @@ import { Response } from "express";
 import { AuthService } from "./auth.service";
 import RegisterDTO from "./dto/register.dto";
 import { LocalAuthGuard } from "./localAuth.guard";
-import RequestWithUser from "./requestWithUser.interface";
+import { RequestWithUser } from "./requestWithUser.interface";
 import JwtAuthGuard from "./guards/jwt-auth.guard";
 import { PostgresErrorInterceptor } from "../errorHandling/interceptors/postgresError.interceptor";
 

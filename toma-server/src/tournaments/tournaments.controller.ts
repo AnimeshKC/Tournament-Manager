@@ -6,12 +6,13 @@ import {
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
-import JwtAuthGuard from "src/auth/guards/jwt-auth.guard";
-import RequestWithUser from "src/auth/requestWithUser.interface";
+
+import { RequestWithUser } from "./../auth/requestWithUser.interface";
 import { TournamentService } from "./tournaments.service";
 import { TournamentVariants } from "./types/tournamentVariants.enum";
 import { PostgresErrorInterceptor } from "./../errorHandling/interceptors/postgresError.interceptor";
 import { PendingService } from "./pending.service";
+import JwtAuthGuard from "../auth/guards/jwt-auth.guard";
 
 //TODO: partition to tourn-manager and tourn-user
 @Controller("tourn")

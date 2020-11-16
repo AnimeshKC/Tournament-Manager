@@ -9,10 +9,11 @@ import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 
 import RegisterDTO from "./dto/register.dto";
-import PostgresErrorCode from "src/database/postgresErrorCodes.enum";
 import TokenPayload from "./tokenPayload.interface";
-import { User } from "src/users/entities/user.entity";
-import { UsersService } from "src/users/users.service";
+
+import PostgresErrorCode from "../database/postgresErrorCodes.enum";
+import { User } from "../users/entities/user.entity";
+import { UsersService } from "../users/users.service";
 
 const saltRounds = 10;
 

@@ -4,10 +4,9 @@ import { LocalStrategy } from "./local.strategy";
 import { JwtModule } from "@nestjs/jwt";
 import { JwtStrategy } from "./jwt.strategy";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-
-import { UsersModule } from "src/users/users.module";
 import { AuthService } from "./auth.service";
 import { AuthController } from "./auth.controller";
+import { UsersModule } from "../users/users.module";
 
 @Module({
   providers: [AuthService, LocalStrategy, JwtStrategy],
