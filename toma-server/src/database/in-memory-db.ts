@@ -36,8 +36,8 @@ async function test() {
   console.log(u);
   // console.log((users as any).tableName);
 
-  /*   ERROR: 
-    "Cannot find table 'user' " even though the users object contains the 'user' table
+  /*PROBLEM: currently the pg-mem syntax parser is incomplete and does not work properly
+  for check constraints or enums, so using the in-memory-db is on hold
  */
   const a = await users.save(u);
   console.log(a);
