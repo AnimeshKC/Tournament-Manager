@@ -1,42 +1,45 @@
+import { ServiceUnavailableException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { getRepositoryToken } from "@nestjs/typeorm";
-import { Connection } from "typeorm";
+import { Connection, Repository } from "typeorm";
+import { MockType } from "../../test/mock.type";
+import { repositoryMockFactory } from "../../test/repositoryMock.factory";
 import { getInMemoryDB } from "../database/in-memory-db";
 import { User } from "./entities/user.entity";
 import { UsersService } from "./users.service";
 
 describe("UsersService", () => {
   let service: UsersService;
-  let conn: Connection;
+  let userRepositoryMock: MockType<Repository<User>>;
   beforeEach(async () => {
-    conn = await getInMemoryDB([User]);
-    // const users = conn.getRepository(User);
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UsersService,
-        { provide: getRepositoryToken(User), useValue: {} },
+        {
+          provide: getRepositoryToken(User),
+          useFactory: repositoryMockFactory,
+        },
       ],
     }).compile();
     service = module.get<UsersService>(UsersService);
-    console.log(service);
+    userRepositoryMock = module.get(getRepositoryToken(User));
   });
-  afterEach(async () => {
-    await conn.close();
-  });
-
   it("should be defined", () => {
     expect(service).toBeDefined();
   });
-  describe("Creating a valid user", () => {
-    it("should return User object", async () => {
-      const user = {
-        email: "user1@gmail.com",
-        username: "u1",
-        password: "abcD123!",
-      };
-      const newUser = await service.create(user);
-      expect(newUser.id).toBeDefined;
+  describe("data access", () => {
+    it("should return all data", async () => {
+      const data = [
+        {
+          id: 1,
+          username: "user1",
+          email: "user1@gmail.com",
+          password: "abcd123!",
+        },
+      ];
+      userRepositoryMock.find.mockImplementation(() => data);
+      const returnData = await service.findAll();
+      expect(returnData).toEqual(data);
     });
   });
 });
