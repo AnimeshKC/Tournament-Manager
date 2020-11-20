@@ -29,7 +29,7 @@ export class UsersService {
       HttpStatus.NOT_FOUND,
     );
   }
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     await this.usersRepository.delete(id);
   }
   async create(userData: CreateUserDTO): Promise<User> {
