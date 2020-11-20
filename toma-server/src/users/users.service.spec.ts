@@ -54,7 +54,7 @@ describe("UsersService", () => {
       });
     });
     describe("findById", () => {
-      it("when id is found, return corresponding user", async () => {
+      it("when id exists, return corresponding user", async () => {
         const existingId = 1;
         const correspondingUser = {
           id: 1,
@@ -66,10 +66,66 @@ describe("UsersService", () => {
         const returnData = await service.findById(existingId);
         expect(returnData).toEqual(correspondingUser);
       });
-      it("when id is not found, expect an error", async () => {
-        const nonexistingId = 10;
+      it("when id does not exist, expect an error", async () => {
+        const nonexistingId = 50000;
         userRepositoryMock.findOne.mockImplementation(_ => undefined);
         await expect(service.findById(nonexistingId)).rejects.toThrow();
+      });
+    });
+    describe("findByUsername", () => {
+      it("when username exists, return corresponding user", async () => {
+        const existingUsername = "user2";
+        const correspondingUser = {
+          id: 2,
+          username: "user2",
+          email: "user2@gmail.com",
+          password: "abcd123!",
+        };
+        userRepositoryMock.findOne.mockImplementation(_ => correspondingUser);
+        const user = await service.findByUsername(existingUsername);
+        expect(user).toEqual(correspondingUser);
+      });
+      it("when username does not exist, expect an error", async () => {
+        const nonexistingUser = "DoesNotExistUser123";
+        userRepositoryMock.findOne.mockImplementation(_ => undefined);
+        await expect(service.findByUsername(nonexistingUser)).rejects.toThrow();
+      });
+    });
+    describe("remove", () => {
+      it("function returns regardless of whether the id exists", async () => {
+        const existingId = 1;
+        const nonexistingId = 90000;
+
+        //return value of delete doesn't matter for this test, since remove doesn't return anything
+        userRepositoryMock.delete.mockImplementation(_ => _);
+        expect(service.remove(existingId)).resolves;
+        expect(service.remove(nonexistingId)).resolves;
+      });
+    });
+    describe("create", () => {
+      it("if user is valid, return user", async () => {
+        const newUser = {
+          username: "user3",
+          email: "user3@gmail.com",
+          password: "abcd123!",
+        };
+        const createdUser = { ...newUser, id: 3 };
+        userRepositoryMock.create.mockImplementation(_ => createdUser);
+        userRepositoryMock.save.mockImplementation(_ => _);
+        expect(await service.create(newUser)).toEqual(createdUser);
+      });
+      it("if user already exists, throws an error", async () => {
+        const existingUser = {
+          id: 1,
+          username: "user1",
+          email: "user1@gmail.com",
+          password: "abcd123!",
+        };
+
+        userRepositoryMock.save.mockImplementation(_ => {
+          throw new Error("Duplicate error");
+        });
+        await expect(service.create(existingUser)).rejects.toThrow();
       });
     });
   });
