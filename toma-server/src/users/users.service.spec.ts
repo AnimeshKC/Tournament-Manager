@@ -1,4 +1,8 @@
-import { ServiceUnavailableException } from "@nestjs/common";
+import {
+  HttpException,
+  HttpStatus,
+  ServiceUnavailableException,
+} from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { getRepositoryToken } from "@nestjs/typeorm";
 import { Connection, Repository } from "typeorm";
@@ -27,19 +31,46 @@ describe("UsersService", () => {
   it("should be defined", () => {
     expect(service).toBeDefined();
   });
-  describe("data access", () => {
-    it("should return all data", async () => {
-      const data = [
-        {
+  describe("Data Access", () => {
+    const data = [
+      {
+        id: 1,
+        username: "user1",
+        email: "user1@gmail.com",
+        password: "abcd123!",
+      },
+      {
+        id: 2,
+        username: "user2",
+        email: "user2@gmail.com",
+        password: "abcd123!",
+      },
+    ];
+    describe("findAll", () => {
+      it("should return all data", async () => {
+        userRepositoryMock.find.mockImplementation(() => data);
+        const returnData = await service.findAll();
+        expect(returnData).toEqual(data);
+      });
+    });
+    describe("findById", () => {
+      it("when id is found, return corresponding user", async () => {
+        const existingId = 1;
+        const correspondingUser = {
           id: 1,
           username: "user1",
           email: "user1@gmail.com",
           password: "abcd123!",
-        },
-      ];
-      userRepositoryMock.find.mockImplementation(() => data);
-      const returnData = await service.findAll();
-      expect(returnData).toEqual(data);
+        };
+        userRepositoryMock.findOne.mockImplementation(_ => correspondingUser);
+        const returnData = await service.findById(existingId);
+        expect(returnData).toEqual(correspondingUser);
+      });
+      it("when id is not found, expect an error", async () => {
+        const nonexistingId = 10;
+        userRepositoryMock.findOne.mockImplementation(_ => undefined);
+        await expect(service.findById(nonexistingId)).rejects.toThrow();
+      });
     });
   });
 });
