@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Tournament } from "./entities/tournament.entity";
@@ -21,6 +21,11 @@ export class TournGenericService {
       { id: tournId },
       { relations: [memberTableString] },
     );
+    if (!tournament)
+      throw new HttpException(
+        "Cannot find a valid tournament",
+        HttpStatus.BAD_REQUEST,
+      );
     return tournament;
   }
   public async incrementTournamentRound(tournId: number) {
