@@ -54,12 +54,25 @@ export class TournamentService {
 
   @Transactional()
   async startTournament(tournId: number) {
-    /*All pending members not accepted to the tournament should be cleared*/
+    /*when starting a tournament, all its pending members are to be cleared,
+    as they lose their window for acceptance
+    */
+    const removePendingMembersPromise = this.removePendingMembers(tournId);
+
+    const getTournamentTypePromise = this.getTournamentType(tournId);
+    const [_, tournamentType] = await Promise.all([
+      removePendingMembersPromise,
+      getTournamentTypePromise,
+    ]);
+    return this.getServiceByTournType(tournamentType).initialize(tournId);
+  }
+
+  private async getTournamentType(tournId: number) {
+    return (await this.tournamentRepository.findOne(tournId)).tournamentType;
+  }
+
+  private async removePendingMembers(tournId: number) {
     const pendingMembers = await this.pendingRepository.find({ tournId });
     await this.pendingRepository.remove(pendingMembers);
-
-    const tournamentType = (await this.tournamentRepository.findOne(tournId))
-      .tournamentType;
-    return this.getServiceByTournType(tournamentType).initialize(tournId);
   }
 }
