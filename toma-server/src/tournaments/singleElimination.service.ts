@@ -51,6 +51,7 @@ export class SingleEliminationService {
       type: "Single Elimination",
     };
   }
+  //returns the smallest power of 2 >= member size
   private getTournSize(memberSize: number) {
     if (memberSize <= 1)
       throw new HttpException(
@@ -122,10 +123,13 @@ export class SingleEliminationService {
 
     return matches;
   }
-  private assignBlindSeeds(memberList: SingleElimMember[]) {
+  private async assignBlindSeeds(memberList: SingleElimMember[]) {
     shuffleArray(memberList);
     memberList.forEach((member, i) => (member.seedValue = i + 1));
+    await this.singleElimRepository.save(memberList);
   }
+
+  //returns a match object with first user and null
   private getMatchObjFirst({
     member,
     round,
@@ -160,6 +164,7 @@ export class SingleEliminationService {
       this.getTournamentWithMembers(tournId),
     ]);
   }
+  //adds the second user to a match object that has the first user filled
   private getMatchObjSecond(
     firstMatchObj: Matches,
     newMember: SingleElimMember,
@@ -183,9 +188,10 @@ export class SingleEliminationService {
         HttpStatus.BAD_REQUEST,
       );
   }
-  private seedMembers(members: SingleElimMember[], details: SingleElimDetails) {
-    if (details.isBlindSeed) this.assignBlindSeeds(members);
-    else throw new Error("This logic has not yet been implemented");
+  private assignMatches(
+    members: SingleElimMember[],
+    details: SingleElimDetails,
+  ) {
     const matches = this.getMatchesForRound({
       memberList: members,
       round: 1,
@@ -193,6 +199,15 @@ export class SingleEliminationService {
     });
     return matches;
   }
+  private async seedMembers(
+    details: SingleElimDetails,
+    members: SingleElimMember[],
+  ) {
+    if (details.isBlindSeed) await this.assignBlindSeeds(members);
+    //TODO: #1 Add Custom Seeding option
+    else throw new Error("This logic has not yet been implemented");
+  }
+
   private validateStartedTournament(round: number) {
     if (!round)
       throw new HttpException(
@@ -204,16 +219,19 @@ export class SingleEliminationService {
     members: SingleElimMember[],
     details: SingleElimDetails,
   ) {
+    //all members will have the same tournId
     const tournId = members[0].tournId;
 
     const roundUpdatePromise = this.tournGenericService.incrementTournamentRound(
       tournId,
     );
-    const matches = this.seedMembers(members, details);
+    const matches = this.assignMatches(members, details);
     const matchesPromise = this.matchesRepository.save(matches);
     await Promise.all([roundUpdatePromise, matchesPromise]);
     return matches;
   }
+  //TODO: Need to add in member validations
+  //TODO:add a custom query for details and tournament that also filters out eliminated members
   async serviceNextRound(tournId: number) {
     const [details, tournament] = await this.getDetailsAndTournament(tournId);
 
@@ -229,12 +247,14 @@ export class SingleEliminationService {
   async initialize(tournId: number) {
     const [details, tournament] = await this.getDetailsAndTournament(tournId);
 
-    /*     If tournament has already started, this function shouldn't be called
-    so an error will be thrown */
+    /* Need to ensure tournament hasn't already started; otherwise, 
+    serviceNextRound should have been called instead*/
     this.validatePendingTournament(tournament.currentRound);
 
     const members = tournament.singleElimMembers;
     details.tournSize = this.getTournSize(members.length);
+    await this.seedMembers(details, members);
+
     const [_, matches] = await Promise.all([
       this.detailsRepository.save(details),
       this.writeMatchesForRound(members, details),
