@@ -5,6 +5,7 @@ import { Propagation, Transactional } from "typeorm-transactional-cls-hooked";
 import { PendingMember } from "./entities/pendingMember.entity";
 import { Tournament } from "./entities/tournament.entity";
 import { SingleEliminationService } from "./singleElimination.service";
+import { TournGenericService } from "./tournGeneric.service";
 import { TournamentVariants } from "./types/tournamentVariants.enum";
 import { variantToServiceMap } from "./types/variantsService.map";
 
@@ -16,6 +17,7 @@ export class TournamentService {
     @InjectRepository(PendingMember)
     private pendingRepository: Repository<PendingMember>,
     private singleElimService: SingleEliminationService,
+    private tournGenericService: TournGenericService,
   ) {}
   private getServiceByTournType(tournType: TournamentVariants) {
     return this[variantToServiceMap[tournType]];
@@ -67,14 +69,7 @@ export class TournamentService {
     return this.getServiceByTournType(tournamentType).initialize(tournId);
   }
   private async getTournament(tournId: number) {
-    const tournament = await this.tournamentRepository.findOne(tournId);
-    if (!tournament) {
-      throw new HttpException(
-        "Tournament does not exist",
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    return tournament;
+    return this.tournGenericService.getTournament(tournId);
   }
   private async getTournamentType(tournId: number) {
     const tournament = await this.getTournament(tournId);
