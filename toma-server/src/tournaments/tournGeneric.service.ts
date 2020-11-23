@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
+import { validateDefined } from "../utilFunctions/validateDefined.util";
 import { Tournament } from "./entities/tournament.entity";
 import { MemberVariants } from "./types/memberTables.enum";
 
@@ -21,15 +22,16 @@ export class TournGenericService {
       { id: tournId },
       { relations: [memberTableString] },
     );
-    if (!tournament)
-      throw new HttpException(
-        "Cannot find a valid tournament",
-        HttpStatus.BAD_REQUEST,
-      );
+    validateDefined(tournament, "Cannot find a valid tournament");
+    return tournament;
+  }
+  public async getTournament(tournId: number) {
+    const tournament = await this.tournamentRepository.findOne(tournId);
+    validateDefined(tournament, "Cannot find a valid tournament");
     return tournament;
   }
   public async incrementTournamentRound(tournId: number) {
-    const tournament = await this.tournamentRepository.findOne(tournId);
+    const tournament = await this.getTournament(tournId);
     tournament.currentRound++;
     await this.tournamentRepository.save(tournament);
   }
