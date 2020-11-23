@@ -66,9 +66,19 @@ export class TournamentService {
     ]);
     return this.getServiceByTournType(tournamentType).initialize(tournId);
   }
-
+  private async getTournament(tournId: number) {
+    const tournament = await this.tournamentRepository.findOne(tournId);
+    if (!tournament) {
+      throw new HttpException(
+        "Tournament does not exist",
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return tournament;
+  }
   private async getTournamentType(tournId: number) {
-    return (await this.tournamentRepository.findOne(tournId)).tournamentType;
+    const tournament = await this.getTournament(tournId);
+    return tournament.tournamentType;
   }
 
   private async removePendingMembers(tournId: number) {
