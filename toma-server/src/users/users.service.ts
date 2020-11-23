@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 
 import { Repository } from "typeorm";
+import { validateDefined } from "../utilFunctions/validateDefined.util";
 import CreateUserDTO from "./dto/createUser.dto";
 import { User } from "./entities/user.entity";
 @Injectable()
@@ -15,19 +16,13 @@ export class UsersService {
   }
   async findById(id: number): Promise<User> {
     const user = await this.usersRepository.findOne(id);
-    if (user) return user;
-    throw new HttpException(
-      "User with this id does not exist",
-      HttpStatus.NOT_FOUND,
-    );
+    validateDefined(user, "User with this id does not exist");
+    return user;
   }
   async findByUsername(username: string): Promise<User> {
     const user = await this.usersRepository.findOne({ username });
-    if (user) return user;
-    throw new HttpException(
-      "User with this username does not exist",
-      HttpStatus.NOT_FOUND,
-    );
+    validateDefined(user, "User with this username does not exist");
+    return user;
   }
   async remove(id: number): Promise<void> {
     await this.usersRepository.delete(id);
