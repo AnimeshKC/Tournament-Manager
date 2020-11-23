@@ -31,13 +31,16 @@ export class TournController {
     const userId = request.user.id;
     return this.tournamentService.createTournament({ ...creationData, userId });
   }
+  //NOTE: The frontend will decide whether a addParticipant or addPending is called on a user
+  //depending on properties of the tournament.
   @Post("addParticipant")
   async addParticipant(
     @Body()
     participantData: {
       tournamentType: TournamentVariants;
-      participantName: string;
+      participantName?: string;
       tournId: number;
+      userId?: number;
     },
   ) {
     return this.tournamentService.addParticipantToTournament(participantData);
@@ -53,6 +56,7 @@ export class TournController {
       tournId: pendingBody.tournId,
     });
   }
+  //TODO: #2 generalize to an array of pending members to accept or reject
   @Post("acceptPending")
   async acceptPending(
     @Body() acceptBody: { tournId: number; pendingUserId: number },
