@@ -141,10 +141,7 @@ export class SingleEliminationService {
   }): Matches {
     return this.matchesRepository.create({
       tournId: member.tournId,
-      userId1: member.userId,
-      participantName1: member.participantName,
-      participantName2: null,
-      userId2: null,
+      member1Id: member.id,
       round,
       matchNumber,
     });
@@ -169,11 +166,10 @@ export class SingleEliminationService {
     firstMatchObj: Matches,
     newMember: SingleElimMember,
   ) {
-    return {
+    return this.matchesRepository.create({
       ...firstMatchObj,
-      participantName2: newMember.participantName,
-      userId2: newMember.userId,
-    };
+      member2Id: newMember.id,
+    });
   }
   @Transactional({ propagation: Propagation.SUPPORTS })
   async createDetails(tournId: number) {
@@ -241,6 +237,7 @@ export class SingleEliminationService {
 
     const members = tournament.singleElimMembers;
     const matches = await this.writeMatchesForRound(members, details);
+
     return matches;
   }
   @Transactional()

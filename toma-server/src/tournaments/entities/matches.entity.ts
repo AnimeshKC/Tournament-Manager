@@ -13,9 +13,6 @@ import {
 
 @Entity()
 //a match requires at least one participant
-@Check(
-  `"participantName1" IS NOT NULL OR "userId1" IS NOT NULL OR "participantName2" IS NOT NULL OR "userId2" IS NOT NULL`,
-)
 export class Matches {
   @PrimaryGeneratedColumn()
   id: number;
@@ -30,30 +27,12 @@ export class Matches {
   @JoinColumn({ name: "tournId" })
   tourn: Tournament;
 
-  @Column({ type: "text", nullable: true })
-  participantName1: string;
-  @Column({ type: "text", nullable: true })
-  participantName2: string;
-
-  @Column({ type: "integer", nullable: true })
-  userId1: number;
-  @ManyToOne(
-    () => User,
-    _ => _,
-    { nullable: true, onDelete: "CASCADE" },
-  )
-  @JoinColumn({ name: "userId1" })
-  user1: User;
-
-  @Column({ type: "integer", nullable: true })
-  userId2: number;
-  @ManyToOne(
-    () => User,
-    _ => _,
-    { nullable: true, onDelete: "CASCADE" },
-  )
-  @JoinColumn({ name: "userId2" })
-  user2: User;
+  //NOTE: member ids aren't given relationships because it's uncertain which table they relate to
+  //As a result, some edge cases with deleted members must be handled when working with matches
+  @Column({ nullable: false })
+  member1Id: number;
+  @Column({ nullable: true })
+  member2Id: number;
 
   @Column({ type: "integer", nullable: false })
   round: number;
