@@ -10,6 +10,7 @@ import { MemberVariants } from "./types/memberTables.enum";
 describe("TournGenericService", () => {
   let service: TournGenericService;
   let tournRepositoryMock: MockType<Repository<Tournament>>;
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -31,17 +32,9 @@ describe("TournGenericService", () => {
       const tournId = 1;
       const tournData = {
         id: 1,
-        name: "Tournament1",
-        currentRound: 0,
-        userId: 1,
         singleElimMembers: [
           {
             id: 1,
-            tournId: 1,
-            usedId: 1,
-            pariticipantName: null,
-            roundEliminated: null,
-            seedValue: 0,
           },
         ],
       };
@@ -77,4 +70,19 @@ describe("TournGenericService", () => {
       });
     });
   });
+  describe("getTournament", () => {
+    const tournData = { id: 1 };
+    it("if id exists, return the tournament data", async () => {
+      const existingId = 1;
+      tournRepositoryMock.findOne.mockImplementation(_ => tournData);
+      const result = await service.getTournament(existingId);
+      expect(result).toEqual(tournData);
+    });
+    it("if id does not exist, expect an error", async () => {
+      const nonExistantTournId = 10000;
+      tournRepositoryMock.findOne.mockImplementation(_ => null);
+      await expect(service.getTournament(nonExistantTournId)).rejects.toThrow();
+    });
+  });
+  describe("incrementTournamentRound", () => {});
 });
