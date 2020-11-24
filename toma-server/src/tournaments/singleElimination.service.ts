@@ -1,12 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { createQueryBuilder, Repository } from "typeorm";
 import { Propagation, Transactional } from "typeorm-transactional-cls-hooked";
 import { Matches } from "./entities/matches.entity";
 import { SingleElimDetails } from "./entities/singleElimDetails.entity";
 import { SingleElimMember } from "./entities/singleElimMember.entity";
+import { Tournament } from "./entities/tournament.entity";
 import { TournGenericService } from "./tournGeneric.service";
-import { MemberVariants } from "./types/memberTables.enum";
 
 //Most Likely extract this to file in the future
 
@@ -30,6 +30,7 @@ export class SingleEliminationService {
     private readonly detailsRepository: Repository<SingleElimDetails>,
     @InjectRepository(Matches)
     private readonly matchesRepository: Repository<Matches>,
+    @InjectRepository(Tournament)
     private tournGenericService: TournGenericService,
   ) {}
 
@@ -146,19 +147,25 @@ export class SingleEliminationService {
       matchNumber,
     });
   }
-  private async getTournamentWithMembers(tournId: number) {
-    return this.tournGenericService.getTournamentWithMembers({
-      memberTableString: MemberVariants.singleElim,
-      tournId,
-    });
+  public async getRemainingTournMembers(tournId: number) {
+    // const tournament = await this.tournamentRepository.findOne({id: tournId})
+    const tournament = await createQueryBuilder<Tournament>(
+      Tournament,
+      "tournament",
+    )
+      .leftJoinAndSelect("tournament.singleElimMembers", "singleElimMembers")
+      .where("tournament.id = :id", { id: tournId })
+      .andWhere("singleElimMembers.roundEliminated IS NULL")
+      .getOne();
+    return tournament;
   }
   private async getDetails(tournId: number) {
     return this.detailsRepository.findOne({ tournId });
   }
-  private async getDetailsAndTournament(tournId: number) {
+  private async getDetailsAndTournMembers(tournId: number) {
     return Promise.all([
       this.getDetails(tournId),
-      this.getTournamentWithMembers(tournId),
+      this.getRemainingTournMembers(tournId),
     ]);
   }
   //adds the second user to a match object that has the first user filled
@@ -228,8 +235,8 @@ export class SingleEliminationService {
   }
   //TODO: Need to add in member validations
   //TODO:add a custom query for details and tournament that also filters out eliminated members
-  async serviceNextRound(tournId: number) {
-    const [details, tournament] = await this.getDetailsAndTournament(tournId);
+  async serviceNextRound(tournId: number, round: number) {
+    const [details, tournament] = await this.getDetailsAndTournMembers(tournId);
 
     /* need to ensure tournament round is greater than 0;
     otherwise, tournSize will be null, and initialize should have been called instead */
@@ -242,7 +249,7 @@ export class SingleEliminationService {
   }
   @Transactional()
   async initialize(tournId: number) {
-    const [details, tournament] = await this.getDetailsAndTournament(tournId);
+    const [details, tournament] = await this.getDetailsAndTournMembers(tournId);
 
     /* Need to ensure tournament hasn't already started; otherwise, 
     serviceNextRound should have been called instead*/

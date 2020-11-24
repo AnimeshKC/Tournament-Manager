@@ -80,4 +80,12 @@ export class TournamentService {
     const pendingMembers = await this.pendingRepository.find({ tournId });
     await this.pendingRepository.remove(pendingMembers);
   }
+  public async getRemainingTournMembers(
+    tournId: number,
+    tournamentType: TournamentVariants,
+  ) {
+    return this.getServiceByTournType(tournamentType).getRemainingTournMembers(
+      tournId,
+    );
+  }
 }
