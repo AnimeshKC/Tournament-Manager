@@ -14,9 +14,9 @@ import { PostgresErrorInterceptor } from "./../errorHandling/interceptors/postgr
 import { PendingService } from "./pending.service";
 import JwtAuthGuard from "../auth/guards/jwt-auth.guard";
 
-//TODO: partition to tourn-manager and tourn-user
 @Controller("tourn")
 @UseInterceptors(PostgresErrorInterceptor)
+//Any tournament request will at the minimum require a user to be logged in
 @UseGuards(JwtAuthGuard)
 export class TournController {
   constructor(
@@ -94,5 +94,11 @@ export class TournController {
       tournId,
       tournamentType,
     );
+  }
+  @Post("assignLoss")
+  async assignLoss(
+    @Body() { matchId, memberId }: { matchId: number; memberId: number },
+  ) {
+    return this.tournamentService.assignLoss(matchId, memberId);
   }
 }

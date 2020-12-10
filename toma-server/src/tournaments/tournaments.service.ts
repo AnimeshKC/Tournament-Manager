@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Propagation, Transactional } from "typeorm-transactional-cls-hooked";
+import { Matches } from "./entities/matches.entity";
 import { PendingMember } from "./entities/pendingMember.entity";
 import { Tournament } from "./entities/tournament.entity";
 import { SingleEliminationService } from "./singleElimination.service";
@@ -16,6 +17,7 @@ export class TournamentService {
     private tournamentRepository: Repository<Tournament>,
     @InjectRepository(PendingMember)
     private pendingRepository: Repository<PendingMember>,
+    private matchesRepository: Repository<Matches>,
     private singleElimService: SingleEliminationService,
     private tournGenericService: TournGenericService,
   ) {}
@@ -87,5 +89,10 @@ export class TournamentService {
     return this.getServiceByTournType(tournamentType).getRemainingTournMembers(
       tournId,
     );
+  }
+
+  assignLoss(matchId: number, memberId: number) {
+    const match = this.matchesRepository.findOne(matchId);
+    throw new Error("Incomplete Implementation");
   }
 }
