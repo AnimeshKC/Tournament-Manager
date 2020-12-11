@@ -34,7 +34,7 @@ export class SingleElimMember {
   @ManyToOne(
     () => User,
     user => user.singleElimEntries,
-    { nullable: true, onDelete: "CASCADE" },
+    { nullable: true, onDelete: "SET NULL" },
   )
   @JoinColumn({ name: "userId" })
   user: User;

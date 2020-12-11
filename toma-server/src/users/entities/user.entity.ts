@@ -17,7 +17,7 @@ export class User {
   @OneToMany(
     () => SingleElimMember,
     entry => entry.user,
-    { onDelete: "CASCADE" },
+    { onDelete: "SET NULL" },
   )
   singleElimEntries: SingleElimMember[];
 
