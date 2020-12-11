@@ -91,8 +91,20 @@ export class TournamentService {
     );
   }
 
-  assignLoss(matchId: number, memberId: number) {
-    const match = this.matchesRepository.findOne(matchId);
+  async assignLoss({
+    roundNumber,
+    memberId,
+    tournamentType,
+  }: {
+    roundNumber: number;
+    memberId: number;
+    tournamentType: TournamentVariants;
+  }) {
+    const member = await this.getServiceByTournType(tournamentType).assignLoss({
+      memberId,
+      roundNumber,
+    });
+
     throw new Error("Incomplete Implementation");
   }
 }

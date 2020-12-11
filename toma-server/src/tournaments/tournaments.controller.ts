@@ -97,8 +97,21 @@ export class TournController {
   }
   @Post("assignLoss")
   async assignLoss(
-    @Body() { matchId, memberId }: { matchId: number; memberId: number },
+    @Body()
+    {
+      roundNumber,
+      memberId,
+      tournamentType,
+    }: {
+      roundNumber: number;
+      memberId: number;
+      tournamentType: TournamentVariants;
+    },
   ) {
-    return this.tournamentService.assignLoss(matchId, memberId);
+    return this.tournamentService.assignLoss({
+      roundNumber,
+      memberId,
+      tournamentType,
+    });
   }
 }

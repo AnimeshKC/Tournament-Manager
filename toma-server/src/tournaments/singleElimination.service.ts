@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { createQueryBuilder, Repository } from "typeorm";
 import { Propagation, Transactional } from "typeorm-transactional-cls-hooked";
+import { validateDefined } from "../utilFunctions/validateDefined.util";
 import { Matches } from "./entities/matches.entity";
 import { SingleElimDetails } from "./entities/singleElimDetails.entity";
 import { SingleElimMember } from "./entities/singleElimMember.entity";
@@ -25,7 +26,7 @@ function shuffleArray<T>(array: T[]): T[] {
 export class SingleEliminationService {
   constructor(
     @InjectRepository(SingleElimMember)
-    private readonly singleElimRepository: Repository<SingleElimMember>,
+    private readonly singleElimMemberRepository: Repository<SingleElimMember>,
     @InjectRepository(SingleElimDetails)
     private readonly detailsRepository: Repository<SingleElimDetails>,
     @InjectRepository(Matches)
@@ -40,8 +41,8 @@ export class SingleEliminationService {
     participantName?: string;
     userId?: number;
   }) {
-    const entry = this.singleElimRepository.create(participantData);
-    await this.singleElimRepository.save(entry);
+    const entry = this.singleElimMemberRepository.create(participantData);
+    await this.singleElimMemberRepository.save(entry);
 
     const { tournId, participantName, userId } = entry;
 
@@ -127,7 +128,7 @@ export class SingleEliminationService {
   private async assignBlindSeeds(memberList: SingleElimMember[]) {
     shuffleArray(memberList);
     memberList.forEach((member, i) => (member.seedValue = i + 1));
-    await this.singleElimRepository.save(memberList);
+    await this.singleElimMemberRepository.save(memberList);
   }
 
   //returns a match object with first user and null
@@ -264,5 +265,28 @@ export class SingleEliminationService {
       this.writeMatchesForRound(members, details),
     ]);
     return matches;
+  }
+  async getMemberById(memberId: number) {
+    const member = await this.singleElimMemberRepository.findOne(memberId);
+    validateDefined(member, "Cannot find specified member");
+    return member;
+  }
+  async assignLoss({
+    memberId,
+    roundNumber,
+  }: {
+    memberId: number;
+    roundNumber: number;
+  }) {
+    const member = await this.getMemberById(memberId);
+    if (!member.roundEliminated) {
+      member.roundEliminated = roundNumber;
+    } else {
+      throw new HttpException(
+        "This Member has already lost",
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    throw new Error("Method not implemented.");
   }
 }
