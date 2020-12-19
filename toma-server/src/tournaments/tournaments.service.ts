@@ -17,6 +17,7 @@ export class TournamentService {
     private tournamentRepository: Repository<Tournament>,
     @InjectRepository(PendingMember)
     private pendingRepository: Repository<PendingMember>,
+    @InjectRepository(Matches)
     private matchesRepository: Repository<Matches>,
     private singleElimService: SingleEliminationService,
     private tournGenericService: TournGenericService,
@@ -104,7 +105,6 @@ export class TournamentService {
       memberId,
       roundNumber,
     });
-
-    throw new Error("Incomplete Implementation");
+    return member;
   }
 }

@@ -271,6 +271,13 @@ export class SingleEliminationService {
     validateDefined(member, "Cannot find specified member");
     return member;
   }
+  private async updateMemberRoundEliminated(
+    member: SingleElimMember,
+    roundEliminated: number,
+  ) {
+    member.roundEliminated = roundEliminated;
+    await this.singleElimMemberRepository.save(member);
+  }
   async assignLoss({
     memberId,
     roundNumber,
@@ -280,13 +287,13 @@ export class SingleEliminationService {
   }) {
     const member = await this.getMemberById(memberId);
     if (!member.roundEliminated) {
-      member.roundEliminated = roundNumber;
+      await this.updateMemberRoundEliminated(member, roundNumber);
+      return member;
     } else {
       throw new HttpException(
         "This Member has already lost",
         HttpStatus.BAD_REQUEST,
       );
     }
-    throw new Error("Method not implemented.");
   }
 }
