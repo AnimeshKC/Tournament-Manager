@@ -195,10 +195,11 @@ export class SingleEliminationService {
   private assignMatches(
     members: SingleElimMember[],
     details: SingleElimDetails,
+    round = 1,
   ) {
     const matches = this.getMatchesForRound({
       memberList: members,
-      round: 1,
+      round,
       tournSize: details.tournSize,
     });
     return matches;
@@ -219,6 +220,9 @@ export class SingleEliminationService {
         HttpStatus.BAD_REQUEST,
       );
   }
+  private async updateRound(tournId: number) {
+    return await this.tournGenericService.incrementTournamentRound(tournId);
+  }
   private async writeMatchesForRound(
     members: SingleElimMember[],
     details: SingleElimDetails,
@@ -226,17 +230,17 @@ export class SingleEliminationService {
     //all members will have the same tournId
     const tournId = members[0].tournId;
 
-    const roundUpdatePromise = this.tournGenericService.incrementTournamentRound(
-      tournId,
-    );
+    // const roundUpdatePromise = this.tournGenericService.incrementTournamentRound(
+    //   tournId,
+    // );
     const matches = this.assignMatches(members, details);
-    const matchesPromise = this.matchesRepository.save(matches);
-    await Promise.all([roundUpdatePromise, matchesPromise]);
+    await this.matchesRepository.save(matches);
     return matches;
   }
   //TODO: Need to add in member validations
   //TODO:add a custom query for details and tournament that also filters out eliminated members
-  async serviceNextRound(tournId: number, round: number) {
+  @Transactional()
+  async serviceNextRound(tournId: number) {
     const [details, tournament] = await this.getDetailsAndTournMembers(tournId);
 
     /* need to ensure tournament round is greater than 0;
@@ -244,7 +248,11 @@ export class SingleEliminationService {
     this.validateStartedTournament(tournament.currentRound);
 
     const members = tournament.singleElimMembers;
-    const matches = await this.writeMatchesForRound(members, details);
+
+    const [_, matches] = await Promise.all([
+      this.updateRound(tournId),
+      this.writeMatchesForRound(members, details),
+    ]);
 
     return matches;
   }
@@ -260,8 +268,9 @@ export class SingleEliminationService {
     details.tournSize = this.getTournSize(members.length);
     await this.seedMembers(details, members);
 
-    const [_, matches] = await Promise.all([
+    const [_, __, matches] = await Promise.all([
       this.detailsRepository.save(details),
+      this.updateRound(tournId),
       this.writeMatchesForRound(members, details),
     ]);
     return matches;
