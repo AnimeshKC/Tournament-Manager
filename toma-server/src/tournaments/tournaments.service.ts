@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Propagation, Transactional } from "typeorm-transactional-cls-hooked";
-import { Matches } from "./entities/matches.entity";
 import { PendingMember } from "./entities/pendingMember.entity";
 import { Tournament } from "./entities/tournament.entity";
 import { SingleEliminationService } from "./singleElimination.service";
@@ -17,8 +16,6 @@ export class TournamentService {
     private tournamentRepository: Repository<Tournament>,
     @InjectRepository(PendingMember)
     private pendingRepository: Repository<PendingMember>,
-    @InjectRepository(Matches)
-    private matchesRepository: Repository<Matches>,
     private singleElimService: SingleEliminationService,
     private tournGenericService: TournGenericService,
   ) {}
@@ -70,6 +67,10 @@ export class TournamentService {
       getTournamentTypePromise,
     ]);
     return this.getServiceByTournType(tournamentType).initialize(tournId);
+  }
+  async advanceRound(tournId: number) {
+    const tournamentType = await this.getTournamentType(tournId);
+    return this.getServiceByTournType(tournamentType).serviceNextRound(tournId);
   }
   private async getTournament(tournId: number) {
     return this.tournGenericService.getTournament(tournId);

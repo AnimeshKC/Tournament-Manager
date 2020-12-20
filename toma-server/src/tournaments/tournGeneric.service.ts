@@ -34,5 +34,6 @@ export class TournGenericService {
     const tournament = await this.getTournament(tournId);
     tournament.currentRound++;
     await this.tournamentRepository.save(tournament);
+    return tournament.currentRound;
   }
 }
