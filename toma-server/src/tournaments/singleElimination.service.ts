@@ -10,8 +10,6 @@ import { Tournament } from "./entities/tournament.entity";
 import { TournGenericService } from "./tournGeneric.service";
 
 //Most Likely extract this to file in the future
-
-//Most Likely extract this to file in the future
 //Uses the Fiser Yates Algorithm
 function shuffleArray<T>(array: T[]): T[] {
   if (array.length <= 1) return array;
@@ -247,6 +245,14 @@ export class SingleEliminationService {
     otherwise, tournSize will be null, and initialize should have been called instead */
     this.validateStartedTournament(tournament.currentRound);
 
+    //Need to ensure that the next round is processed only if all the matches have ended
+    /*In the case of a tournament being forced to move onto another round, another method
+    will take care of eliminating ongoing matches*/
+    await this.validateRoundComplete({
+      tournId,
+      round: tournament.currentRound,
+    });
+
     const members = tournament.singleElimMembers;
 
     const [_, matches] = await Promise.all([
@@ -255,6 +261,35 @@ export class SingleEliminationService {
     ]);
 
     return matches;
+  }
+  private async validateRoundComplete({
+    tournId,
+    round,
+  }: {
+    tournId: number;
+    round: number;
+  }) {
+    const matches = await this.matchesRepository.find({ tournId, round });
+    for (const match of matches) {
+      const member1Id = match.member1Id;
+      const member2Id = match.member2Id;
+
+      //if there's only one member to a match (a bye), it's already complete
+      if (!member1Id || !member2Id) {
+        continue;
+      }
+      const [member1, member2] = await Promise.all([
+        this.singleElimMemberRepository.findOne(member1Id),
+        this.singleElimMemberRepository.findOne(member2Id),
+      ]);
+
+      if (!member1.roundEliminated && !member2.roundEliminated) {
+        throw new HttpException(
+          "Cannot advance Round when there is an unfinished match",
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
   }
   @Transactional()
   async initialize(tournId: number) {
