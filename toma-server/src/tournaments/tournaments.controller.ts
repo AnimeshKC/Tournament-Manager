@@ -78,6 +78,10 @@ export class TournController {
   async startTournament(@Body() { tournId }: { tournId: number }) {
     return this.tournamentService.startTournament(tournId);
   }
+  @Post("advanceRound")
+  async advanceRound(@Body() { tournId }: { tournId: number }) {
+    return this.tournamentService.advanceRound(tournId);
+  }
 
   @Post("getRemainingTournMembers")
   async getRemainingTournMembers(
