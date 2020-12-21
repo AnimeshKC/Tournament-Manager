@@ -118,4 +118,17 @@ export class TournController {
       tournamentType,
     });
   }
+  @Post("declareWinner")
+  async declareWinner(
+    @Body()
+    {
+      tournId,
+      tournamentType,
+    }: {
+      tournId: number;
+      tournamentType?: TournamentVariants;
+    },
+  ) {
+    return this.tournamentService.declareWinner(tournId, tournamentType);
+  }
 }

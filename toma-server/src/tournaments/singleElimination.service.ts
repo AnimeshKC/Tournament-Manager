@@ -145,7 +145,7 @@ export class SingleEliminationService {
       matchNumber,
     });
   }
-  public async getRemainingTournMembers(tournId: number) {
+  public async getTournamentWithRemainingMembers(tournId: number) {
     // const tournament = await this.tournamentRepository.findOne({id: tournId})
     const tournament = await createQueryBuilder<Tournament>(
       Tournament,
@@ -163,7 +163,7 @@ export class SingleEliminationService {
   private async getDetailsAndTournMembers(tournId: number) {
     return Promise.all([
       this.getDetails(tournId),
-      this.getRemainingTournMembers(tournId),
+      this.getTournamentWithRemainingMembers(tournId),
     ]);
   }
   //adds the second user to a match object that has the first user filled
@@ -262,6 +262,22 @@ export class SingleEliminationService {
 
     return matches;
   }
+  private validateOnlyWinnerRemains(remainingMembers: SingleElimMember[]) {
+    if (remainingMembers.length > 1) {
+      throw new HttpException(
+        "Cannot declare a winner as more than one member remains",
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+  async declareWinner(tournId: number) {
+    const tournament = await this.getTournamentWithRemainingMembers(tournId);
+    const remainingMembers = tournament.singleElimMembers;
+    this.validateOnlyWinnerRemains(remainingMembers);
+    const winner = remainingMembers[0];
+
+    return { isWinnerFound: true, ...winner };
+  }
   private async validateRoundComplete({
     tournId,
     round,
@@ -310,6 +326,7 @@ export class SingleEliminationService {
     ]);
     return matches;
   }
+
   async getMemberById(memberId: number) {
     const member = await this.singleElimMemberRepository.findOne(memberId);
     validateDefined(member, "Cannot find specified member");

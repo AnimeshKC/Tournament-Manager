@@ -39,14 +39,18 @@ export class TournamentService {
     return newTournament;
   }
   @Transactional({ propagation: Propagation.SUPPORTS })
-  async addParticipantToTournament(participantData: {
-    tournamentType: TournamentVariants;
+  async addParticipantToTournament({
+    tournamentType,
+    ...singleElimData
+  }: {
+    tournamentType?: TournamentVariants;
     participantName?: string;
     userId?: number;
     tournId: number;
   }) {
-    const { tournamentType, ...singleElimData } = participantData;
-
+    if (!tournamentType) {
+      tournamentType = await this.getTournamentType(singleElimData.tournId);
+    }
     //obtains the corresponding service for a tournament type
     //FUTURE: As more tournaments are added, may need to define an interface for tournService
     return this.getServiceByTournType(tournamentType).addParticipant(
@@ -68,9 +72,17 @@ export class TournamentService {
     ]);
     return this.getServiceByTournType(tournamentType).initialize(tournId);
   }
-  async advanceRound(tournId: number) {
-    const tournamentType = await this.getTournamentType(tournId);
+  async advanceRound(tournId: number, tournamentType?: TournamentVariants) {
+    if (!tournamentType) {
+      tournamentType = await this.getTournamentType(tournId);
+    }
     return this.getServiceByTournType(tournamentType).serviceNextRound(tournId);
+  }
+  async declareWinner(tournId: number, tournamentType?: TournamentVariants) {
+    if (!tournamentType) {
+      tournamentType = await this.getTournamentType(tournId);
+    }
+    return this.getServiceByTournType(tournamentType).declareWinner(tournId);
   }
   private async getTournament(tournId: number) {
     return this.tournGenericService.getTournament(tournId);
@@ -86,11 +98,14 @@ export class TournamentService {
   }
   public async getRemainingTournMembers(
     tournId: number,
-    tournamentType: TournamentVariants,
+    tournamentType?: TournamentVariants,
   ) {
-    return this.getServiceByTournType(tournamentType).getRemainingTournMembers(
-      tournId,
-    );
+    if (!tournamentType) {
+      tournamentType = await this.getTournamentType(tournId);
+    }
+    return this.getServiceByTournType(
+      tournamentType,
+    ).getTournamentWithRemainingMembers(tournId);
   }
 
   async assignLoss({
