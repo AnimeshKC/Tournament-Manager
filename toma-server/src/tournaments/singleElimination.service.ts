@@ -29,7 +29,6 @@ export class SingleEliminationService {
     private readonly detailsRepository: Repository<SingleElimDetails>,
     @InjectRepository(Matches)
     private readonly matchesRepository: Repository<Matches>,
-    @InjectRepository(Tournament)
     private tournGenericService: TournGenericService,
   ) {}
 
@@ -224,6 +223,7 @@ export class SingleEliminationService {
   private async writeMatchesForRound(
     members: SingleElimMember[],
     details: SingleElimDetails,
+    round = 1,
   ) {
     //all members will have the same tournId
     const tournId = members[0].tournId;
@@ -231,7 +231,7 @@ export class SingleEliminationService {
     // const roundUpdatePromise = this.tournGenericService.incrementTournamentRound(
     //   tournId,
     // );
-    const matches = this.assignMatches(members, details);
+    const matches = this.assignMatches(members, details, round);
     await this.matchesRepository.save(matches);
     return matches;
   }
@@ -254,10 +254,10 @@ export class SingleEliminationService {
     });
 
     const members = tournament.singleElimMembers;
-
+    const nextRound = tournament.currentRound + 1;
     const [_, matches] = await Promise.all([
       this.updateRound(tournId),
-      this.writeMatchesForRound(members, details),
+      this.writeMatchesForRound(members, details, nextRound),
     ]);
 
     return matches;
@@ -306,7 +306,7 @@ export class SingleEliminationService {
     const [_, __, matches] = await Promise.all([
       this.detailsRepository.save(details),
       this.updateRound(tournId),
-      this.writeMatchesForRound(members, details),
+      this.writeMatchesForRound(members, details, 1),
     ]);
     return matches;
   }
