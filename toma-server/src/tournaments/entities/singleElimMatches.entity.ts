@@ -1,4 +1,4 @@
-import { User } from "../../users/entities/user.entity";
+import { SingleElimMember } from "./singleElimMember.entity";
 import { Tournament } from "./tournament.entity";
 
 import {
@@ -6,14 +6,12 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  Check,
-  Unique,
   JoinColumn,
 } from "typeorm";
 
 @Entity()
 //a match requires at least one participant
-export class Matches {
+export class singleEliminationMatches {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -27,12 +25,26 @@ export class Matches {
   @JoinColumn({ name: "tournId" })
   tourn: Tournament;
 
-  //NOTE: member ids aren't given relationships because it's uncertain which table they relate to
-  //As a result, some edge cases with deleted members must be handled when working with matches
-  @Column({ nullable: false })
+  //Allow nullable true for the sake of handling deleted users
+  @Column({ nullable: true })
   member1Id: number;
+  @ManyToOne(
+    _ => SingleElimMember,
+    _ => _,
+    { nullable: true, onDelete: "SET NULL" },
+  )
+  @JoinColumn({ name: "member1Id" })
+  member1: SingleElimMember;
+
   @Column({ nullable: true })
   member2Id: number;
+  @ManyToOne(
+    _ => SingleElimMember,
+    _ => _,
+    { nullable: true, onDelete: "SET NULL" },
+  )
+  @JoinColumn({ name: "member2Id" })
+  member2: SingleElimMember;
 
   @Column({ type: "integer", nullable: false })
   round: number;

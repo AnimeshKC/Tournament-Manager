@@ -2,7 +2,7 @@ import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AuthModule } from "../auth/auth.module";
 import { UsersModule } from "../users/users.module";
-import { Matches } from "./entities/matches.entity";
+import { singleEliminationMatches } from "./entities/singleElimMatches.entity";
 import { PendingMember } from "./entities/pendingMember.entity";
 import { SingleElimDetails } from "./entities/singleElimDetails.entity";
 import { SingleElimMember } from "./entities/singleElimMember.entity";
@@ -16,7 +16,7 @@ export const tournamentModuleEntities = [
   Tournament,
   SingleElimMember,
   PendingMember,
-  Matches,
+  singleEliminationMatches,
   SingleElimDetails,
 ];
 @Module({

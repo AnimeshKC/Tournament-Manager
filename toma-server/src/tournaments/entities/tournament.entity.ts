@@ -12,7 +12,7 @@ import { TournamentStatus } from "../types/tournamentStatus.enum";
 import { TournamentVariants } from "../types/tournamentVariants.enum";
 import { SingleElimMember } from "./singleElimMember.entity";
 import { PendingMember } from "./pendingMember.entity";
-import { Matches } from "./matches.entity";
+import { singleEliminationMatches } from "./singleElimMatches.entity";
 
 @Entity()
 export class Tournament {
@@ -65,8 +65,8 @@ export class Tournament {
   currentRound: number;
 
   @OneToMany(
-    () => Matches,
+    () => singleEliminationMatches,
     match => match.tourn,
   )
-  matches: Matches;
+  matches: singleEliminationMatches;
 }

@@ -3,11 +3,12 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { createQueryBuilder, Repository } from "typeorm";
 import { Propagation, Transactional } from "typeorm-transactional-cls-hooked";
 import { validateDefined } from "../utilFunctions/validateDefined.util";
-import { Matches } from "./entities/matches.entity";
+import { singleEliminationMatches } from "./entities/singleElimMatches.entity";
 import { SingleElimDetails } from "./entities/singleElimDetails.entity";
 import { SingleElimMember } from "./entities/singleElimMember.entity";
 import { Tournament } from "./entities/tournament.entity";
 import { TournGenericService } from "./tournGeneric.service";
+import { validate } from "class-validator";
 
 //Most Likely extract this to file in the future
 //Uses the Fiser Yates Algorithm
@@ -27,8 +28,10 @@ export class SingleEliminationService {
     private readonly singleElimMemberRepository: Repository<SingleElimMember>,
     @InjectRepository(SingleElimDetails)
     private readonly detailsRepository: Repository<SingleElimDetails>,
-    @InjectRepository(Matches)
-    private readonly matchesRepository: Repository<Matches>,
+    @InjectRepository(singleEliminationMatches)
+    private readonly singleEliminationMatchesRepository: Repository<
+      singleEliminationMatches
+    >,
     private tournGenericService: TournGenericService,
   ) {}
 
@@ -95,7 +98,7 @@ export class SingleEliminationService {
     round: number;
     tournSize: number;
   }) {
-    const rankMap: Record<number, Matches> = {};
+    const rankMap: Record<number, singleEliminationMatches> = {};
 
     for (const member of memberList) {
       const matchNumber = this.getMatchNumber({
@@ -137,8 +140,8 @@ export class SingleEliminationService {
     member: SingleElimMember;
     round: number;
     matchNumber: number;
-  }): Matches {
-    return this.matchesRepository.create({
+  }): singleEliminationMatches {
+    return this.singleEliminationMatchesRepository.create({
       tournId: member.tournId,
       member1Id: member.id,
       round,
@@ -155,10 +158,13 @@ export class SingleEliminationService {
       .where("tournament.id = :id", { id: tournId })
       .andWhere("singleElimMembers.roundEliminated IS NULL")
       .getOne();
+    validateDefined(tournament, "corresponding tournament not defined");
     return tournament;
   }
   private async getDetails(tournId: number) {
-    return this.detailsRepository.findOne({ tournId });
+    const details = this.detailsRepository.findOne({ tournId });
+    validateDefined(details, "corresponding details not defined");
+    return details;
   }
   private async getDetailsAndTournMembers(tournId: number) {
     return Promise.all([
@@ -168,10 +174,10 @@ export class SingleEliminationService {
   }
   //adds the second user to a match object that has the first user filled
   private getMatchObjSecond(
-    firstMatchObj: Matches,
+    firstMatchObj: singleEliminationMatches,
     newMember: SingleElimMember,
   ) {
-    return this.matchesRepository.create({
+    return this.singleEliminationMatchesRepository.create({
       ...firstMatchObj,
       member2Id: newMember.id,
     });
@@ -232,7 +238,7 @@ export class SingleEliminationService {
     //   tournId,
     // );
     const matches = this.assignMatches(members, details, round);
-    await this.matchesRepository.save(matches);
+    await this.singleEliminationMatchesRepository.save(matches);
     return matches;
   }
   //TODO: Need to add in member validations
@@ -285,7 +291,10 @@ export class SingleEliminationService {
     tournId: number;
     round: number;
   }) {
-    const matches = await this.matchesRepository.find({ tournId, round });
+    const matches = await this.singleEliminationMatchesRepository.find({
+      tournId,
+      round,
+    });
     for (const match of matches) {
       const member1Id = match.member1Id;
       const member2Id = match.member2Id;
