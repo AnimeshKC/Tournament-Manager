@@ -1,6 +1,6 @@
 # Welcome to Toma
 
-This is _Toma_, a Tournament Management Application. Currently in the phase of developing the backend API.
+This is _Toma_, a Tournament Management API. Currently has completed Single Elimination tournaments. 
 
 ## Local Setup Details
 
