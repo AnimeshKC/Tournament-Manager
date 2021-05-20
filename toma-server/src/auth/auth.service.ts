@@ -63,10 +63,11 @@ export class AuthService {
   private async verifyPassword(password: string, hashedPassword: string) {
     const isPasswordMatching = await bcrypt.compare(password, hashedPassword);
     if (!isPasswordMatching) {
-      throw new HttpException(
-        "Wrong credentials provided",
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new UnauthorizedException("invalidLogin");
+      // throw new HttpException(
+      //   "Wrong credentials provided",
+      //   HttpStatus.BAD_REQUEST,
+      // );
     }
   }
   public getLogoutCookie(): string {
